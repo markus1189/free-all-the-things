@@ -5,3 +5,4 @@ auto/
 result/
 /_region_.tex
 /cc-font.nix
+.shake/
