@@ -1,0 +1,140 @@
+\documentclass{beamer}
+
+% Must be loaded first
+\usepackage{tikz}
+ 
+\usepackage[utf8]{inputenc}
+\usepackage{textpos}
+
+% Font configuration
+\usepackage{fontspec}
+
+\input{font.tex}
+
+% Tikz for beautiful drawings
+\usetikzlibrary{mindmap,backgrounds}
+\usetikzlibrary{arrows.meta,arrows}
+\usetikzlibrary{shapes.geometric}
+
+% Minted configuration for source code highlighting
+\usepackage{minted}
+\setminted{highlightcolor=black!5, linenos}
+\setminted{style=lovelace}
+
+\usepackage[listings, minted]{tcolorbox}
+\tcbset{left=6mm}
+
+% Use the include theme
+\usetheme{codecentric}
+
+% Metadata
+\title{Demo Beamer Template}
+\author{Markus Hauck}
+
+% The presentation content
+\begin{document}
+
+\begin{frame}[noframenumbering,plain]
+  \titlepage{}
+\end{frame}
+
+\section{Introduction}\label{sec:introduction}
+ 
+\begin{frame}
+\frametitle{The First Awesome Slide}
+\begin{itemize}
+\item normal text
+\item \textbf{text in bold}
+\item \textit{text in italics}
+\item \texttt{text in mono}
+\end{itemize}
+\end{frame}
+
+\section{Main Part}\label{sec:main-part}
+\begin{frame}
+  \frametitle{The Main Part}
+  \begin{itemize}
+  \item This is where
+  \item the really interesting
+  \item stuff happens!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{I can haz Source Code}
+  \begin{center}
+\begin{minted}{scala}
+object Main extends App {
+  implicit val sys = ActorSystem()
+  implicit val mat = ActorMaterializer()
+  
+  sys.actorOf[MainActor]
+}
+\end{minted}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{I can haz Source Code more}
+  You can also highlight lines:
+  \begin{center}
+\begin{minted}[highlightlines={3}]{haskell}
+main :: IO ()
+main = shakeArgs shakeOptions $ do
+  want ["world dominance"]
+
+  "world dominance" %> \out ->
+    executePlan out
+\end{minted}
+  \end{center}
+\end{frame}
+
+\section{Second Part}
+
+\begin{frame}
+  \frametitle{Mind Maps}
+  \begin{center}
+    \resizebox{0.8\textwidth}{!}{\input{mindmap}}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Colorful Boxes}
+  \begin{tcolorbox}[
+    fonttitle=\sffamily\bfseries\large,
+    colbacktitle=black,
+    colframe=black,
+    coltitle=beamer@centricgreen,
+    title=Hello World
+    ]
+    This is a \textbf{tcolorbox}.
+  \end{tcolorbox}
+  \begin{tcolorbox}[
+    fonttitle=\sffamily\bfseries\large,
+    colbacktitle=black,
+    colframe=black,
+    coltitle=beamer@codeblue,
+    title=Hello World
+    ]
+    This is a \textbf{tcolorbox}.
+  \end{tcolorbox}
+  \begin{tcolorbox}[
+    fonttitle=\sffamily\bfseries\large,
+    colbacktitle=black,
+    colframe=black,
+    title=Hello World
+    ]
+    This is a \textbf{tcolorbox}.
+  \end{tcolorbox}
+\end{frame}
+
+\section{Conclusion}\label{sec:conclusion}
+
+\begin{frame}
+  \begin{center}
+    \huge
+    Your conclusion here
+  \end{center}
+\end{frame}
+ 
+\end{document}

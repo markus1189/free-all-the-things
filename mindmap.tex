@@ -1,0 +1,35 @@
+\begin{tikzpicture}
+  \path[small mindmap, concept color=beamer@codeblue,
+  level 1 concept/.append style={every child/.style={concept color=beamer@centricgreen}},
+  level 2 concept/.append style={every child/.style={concept color=beamer@centricgreen!50}}
+  ]
+  node[concept] {Computer Science}
+  [clockwise from=0]
+  child {
+    node[concept] {practical}
+    [clockwise from=90]
+    child { node[concept] (algo) {algorithms} }
+    child { node[concept] {data structures} }
+    child { node[concept] {pro\-gramming languages} }
+    child { node[concept] {software engineer\-ing} }
+  }
+  child { node[concept] {technical} }
+  child { node[concept] (theo) {theoretical} }
+  child {
+    node[concept] {applied}
+    [clockwise from=180]
+    child { node[concept] {databases} }
+    child { node[concept] {WWW} }
+  }
+  
+  node [annotation, xshift=-2cm, yshift=-5mm] (annot) at (theo.south) {
+    \setsansfont{Caveat} \large This is an annotation }
+  node [annotation, xshift=1cm, yshift=15mm] (annot2) at (algo.north) {
+    \setsansfont{Caveat} \large This is another annotation }
+  ;
+
+  \begin{pgfonlayer}{background}
+    \draw[draw=black, thick, shorten <=1mm, shorten >=1mm, -{Stealth[length=3mm, open, round]}] (annot) edge (theo);
+    \draw[draw=black, thick, shorten <=1mm, shorten >=1mm, -{Stealth[length=3mm, open, round]}] (annot2) edge (algo);
+  \end{pgfonlayer}
+\end{tikzpicture}
