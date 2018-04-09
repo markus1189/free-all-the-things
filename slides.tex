@@ -2,7 +2,7 @@
 
 % Must be loaded first
 \usepackage{tikz}
- 
+
 \usepackage[utf8]{inputenc}
 \usepackage{textpos}
 
@@ -28,7 +28,7 @@
 \usetheme{codecentric}
 
 % Metadata
-\title{Demo Beamer Template}
+\title{Free All The Things}
 \author{Markus Hauck}
 
 % The presentation content
@@ -39,18 +39,37 @@
 \end{frame}
 
 \section{Introduction}\label{sec:introduction}
- 
+
 \begin{frame}
-\frametitle{The First Awesome Slide}
+\frametitle{Free All The Things}
 \begin{itemize}
-\item normal text
-\item \textbf{text in bold}
-\item \textit{text in italics}
-\item \texttt{text in mono}
+\item well known: free monads
+\item maybe known: free applicatives
+\item free monoids
+\item free <you name it>
 \end{itemize}
 \end{frame}
 
-\section{Main Part}\label{sec:main-part}
+\begin{frame}
+  \frametitle{The Road Ahead}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What Is Free}
+  A free functor is left adjoint to a forgetful functor
+  What's the problem?
+\end{frame}
+
+\begin{frame}
+  \frametitle{What Is Free}
+  \begin{itemize}
+  \item a free X is the minimal thing that satisfies X's laws
+  \item \textbf{nothing} else!
+
+  \end{itemize}
+\end{frame}
+
+\section{Free A Monad}\label{sec:main-part}
 \begin{frame}
   \frametitle{The Main Part}
   \begin{itemize}
@@ -67,7 +86,7 @@
 object Main extends App {
   implicit val sys = ActorSystem()
   implicit val mat = ActorMaterializer()
-  
+
   sys.actorOf[MainActor]
 }
 \end{minted}
@@ -136,5 +155,5 @@ main = shakeArgs shakeOptions $ do
     Your conclusion here
   \end{center}
 \end{frame}
- 
+
 \end{document}
