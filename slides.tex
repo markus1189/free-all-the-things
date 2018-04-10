@@ -69,6 +69,37 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Why Free}
+  \begin{itemize}
+  \item having a Free X is good for a number of reasons
+  \item use Free X as if it was X
+  \item but the program is reified into some (data-)structure
+  \item this structure can often be analyzed and optimized
+  \item the killer: interpreters of the program can vary
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Scales of Power}
+  \begin{itemize}
+  \item the structures we will look at, are able to capture computations that have different power abilities
+  \item monad: depend on previous values and branching
+  \item applicative: fixed structure with arbitrary applicative effects in between
+  \item functor: well\ldots
+  \item monoid: limited power, but very flexible and composable
+  \item surprise
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Vs Tagless}
+  \begin{itemize}
+  \item we will mostly look at the data structure version of Free X
+  \item the alternative is to use finally tagless representations
+  \end{itemize}
+\end{frame}
+
 \section{Free A Monad}\label{sec:main-part}
 \begin{frame}
   \frametitle{The Main Part}
