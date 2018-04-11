@@ -100,43 +100,107 @@
   \end{itemize}
 \end{frame}
 
-\section{Free A Monad}\label{sec:main-part}
-\begin{frame}
-  \frametitle{The Main Part}
+\section{Freeing The Monad}\label{sec:free-monad}
+\begin{frame}[fragile]
+  \frametitle{Freeing The Monad}
   \begin{itemize}
-  \item This is where
-  \item the really interesting
-  \item stuff happens!
+  \item what are the operations?
+  \end{itemize}
+    \begin{center}
+\begin{minted}{scala}
+trait Monad[F[_]] {
+  def pure[A](x: A): F[A]
+  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+}
+\end{minted}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Monad}
+\begin{itemize}
+  \item what are the laws?
+\end{itemize}
+    \begin{center}
+\begin{minted}{scala}
+// Left identity
+pure(a).flatMap(f) === f(a)
+
+// Right identity
+fa.flatMap(pure) === fa
+
+// Associativity
+fa.flatMap(f).flatMap(g) ===
+  fa.flatMap(a -> f(a).flatMap(g))
+\end{minted}
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Monad}
+  \begin{itemize}
+  \item todo: the minimal ``thing'' that has a \textit{Monad} instance
+    \textbf{satisfies} the laws
+  \item simple idea: capture as data
+  \item btw: any minimal combination works!
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{I can haz Source Code}
-  \begin{center}
+  \frametitle{Freeing The Monad}
+    \begin{center}
 \begin{minted}{scala}
-object Main extends App {
-  implicit val sys = ActorSystem()
-  implicit val mat = ActorMaterializer()
-
-  sys.actorOf[MainActor]
+trait Monad[F[_]] {
+  def pure[A](x: A): F[A]
+  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 }
 \end{minted}
-  \end{center}
+\vspace{1cm}
+\begin{minted}{scala}
+sealed abstract class Free[F[_], A]
+
+final case class Pure[F[_], A](a: A) extends Free[F, A]
+
+final case class FlatMap[F[_], A, B](
+  fa: Free[F, A], f: A => Free[F, B]) extends Free[F, B]
+  \end{minted}
+\end{center}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{I can haz Source Code more}
-  You can also highlight lines:
-  \begin{center}
-\begin{minted}[highlightlines={3}]{haskell}
-main :: IO ()
-main = shakeArgs shakeOptions $ do
-  want ["world dominance"]
+  \frametitle{Freeing The Monad}
+    \begin{center}
+\begin{minted}{scala}
+implicit def freeMonad[F[_], A]: Monad[Free[F, A]] =
+  new Monad[Free[F, A]] {
+    def pure[A](x: A): Free[F, A] = Pure(x)
 
-  "world dominance" %> \out ->
-    executePlan out
+    def flatMap[A, B](fa: Free[F, A])(
+      f: A => Free[F, B]): F[B] = FlatMap(fa, f)
+  }
 \end{minted}
-  \end{center}
+\end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Freeing The Monad}
+  \begin{itemize}
+  \item but what about the laws?!
+  \item clearly we are violating all of them!
+  \item we need one more thing: the interpreter
+  \end{itemize}
+  \begin{minted}{scala}
+def runFree[F[_], M[_]:Monad, A](nat: FunctionK[F, M]): Free[F, A] => M[A] = ???
+  \end{minted}
+\end{frame}
+
+\section{Freeing The Applicative}\label{sec:free-applicative}
+
+\begin{frame}
+  \frametitle{Freeing The Applicative}
+  \begin{itemize}
+  \item we follow the same pattern
+  \end{itemize}
 \end{frame}
 
 \section{Second Part}

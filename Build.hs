@@ -5,8 +5,6 @@
 
 module Main where
 
-import Control.Monad (when)
-import Data.List (isSuffixOf)
 import Development.Shake
 import Development.Shake.FilePath
 
@@ -53,9 +51,6 @@ rules = do
   buildDir </> "font.tex" %> \_ -> dumpFontFile
 
   buildDir </> "*.tex" %> \out -> do
-    when ("slides.tex" `isSuffixOf` out) $ do
-      dumpFontFile
-      return ()
     copyFileChanged (dropDirectory1 out) out
 
   buildDir </> "*.sty" %> \out -> do
@@ -75,6 +70,7 @@ dumpFontFile :: Action ()
 dumpFontFile = do
   putNormal ("dumping file to " ++ (buildDir </> "font.tex"))
   -- Guaranteed to be present via `shell.nix`, although this couples shake and nix...
+
   Just useCodecentricFont <- getEnv "USE_CC_FONT"
   let filename = if useCodecentricFont == "true" then "font_cc.tex" else "font_non_cc.tex"
       outname = (buildDir </> "font.tex")
