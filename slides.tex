@@ -183,15 +183,35 @@ implicit def freeMonad[F[_], A]: Monad[Free[F, A]] =
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Freeing The Monad}
+  \frametitle{The Interpreter}
   \begin{itemize}
   \item but what about the laws?!
   \item clearly we are violating all of them!
   \item we need one more thing: the interpreter
   \end{itemize}
   \begin{minted}{scala}
-def runFree[F[_], M[_]:Monad, A](nat: FunctionK[F, M]): Free[F, A] => M[A] = ???
+def runFree[F[_], M[_]:Monad, A](
+  nat: FunctionK[F, M]): Free[F, A] => M[A] = ???
   \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Laws}
+  \begin{itemize}
+  \item together with the interpreter, we have to fulfill the laws
+    \begin{minted}{scala}
+runFree(nat)(pure(a).flatMap(f)) ===
+  runFree(nat)(f(a))
+    \end{minted}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Freeing The Monad}
+  \begin{itemize}
+  \item that's it for the Monad
+  \item what else?
+  \end{itemize}
 \end{frame}
 
 \section{Freeing The Applicative}\label{sec:free-applicative}
@@ -199,8 +219,25 @@ def runFree[F[_], M[_]:Monad, A](nat: FunctionK[F, M]): Free[F, A] => M[A] = ???
 \begin{frame}
   \frametitle{Freeing The Applicative}
   \begin{itemize}
-  \item we follow the same pattern
+  \item free monads are great, but also limited
+  \item we can't analyze the programs
+  \item how about a smaller gun?
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Freeing The Applicative}
+  \begin{itemize}
+  \item we follow the same pattern
+  \item look at typeclass operations
+  \item create datastructure
+  \item ``interpreter''
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Freeing The Applicative}
+
 \end{frame}
 
 \section{Second Part}
