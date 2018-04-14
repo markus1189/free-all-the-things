@@ -51,6 +51,23 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Goal Of This Talk}
+  \begin{itemize}
+  \item how many of you wrote a Free X
+  \item how many of you used Free\ldots
+    \begin{itemize}
+    \item Monad
+    \item Applicative
+    \item Functor
+    \item Boolean Algebra
+    \item other?
+    \end{itemize}
+  \item Goal: explain the technique behind ``Free X''
+  \item Be able to apply the ``pattern'' yourself
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{The Road Ahead}
 \end{frame}
 
@@ -150,7 +167,7 @@ fa.flatMap(f).flatMap(g) ===
   \frametitle{Freeing The Monad}
     \begin{center}
 \begin{minted}{scala}
-trait Monad[F[_]] {
+trait Monad[F[_]] extends Applicative[F] {
   def pure[A](x: A): F[A]
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 }
@@ -207,6 +224,15 @@ runFree(nat)(pure(a).flatMap(f)) ===
 \end{frame}
 
 \begin{frame}
+  \frametitle{So What?}
+  \begin{itemize}
+  \item the laws tell us what ``rewriting'' is possible
+  \item here: \textbf{flatMap} has to be associative, that means we can re-associate
+  \item why? Let's look at what happens with normal \textbf{flatMap}s
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{Freeing The Monad}
   \begin{itemize}
   \item that's it for the Monad
@@ -235,48 +261,58 @@ runFree(nat)(pure(a).flatMap(f)) ===
   \end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
+  \frametitle{The Applicative Class}
+  \begin{minted}{scala}
+trait Applicative[F[_]] extends Functor[F] {
+  def pure[A](x: A): F[A]
+  def ap[A](fab: F[A => B], fa: F[A]): F[B]
+}
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{Freeing The Applicative}
-
+  \begin{itemize}
+  \item again the same pattern: we model it as an ADT
+  \end{itemize}
+  \begin{minted}{scala}
+sealed abstract class FreeAp[F[_]]
+final case class Pure[F[_], A](a: A) extends FreeAp[F, A]
+final case class Ap[F[_], A, B](fab: FreeAp[F, A => B], fa: FreeAp[F, A]) extends FreeAp[F, B]
+\end{minted}
+\begin{itemize}
+\item of course we also need the interpreter
+\end{itemize}
 \end{frame}
 
-\section{Second Part}
-
 \begin{frame}
-  \frametitle{Mind Maps}
-  \begin{center}
-    \resizebox{0.8\textwidth}{!}{\input{mindmap}}
-  \end{center}
+  \frametitle{Less Power?!}
+  \begin{itemize}
+  \item why would we consider Applicative if it's less powerful?
+  \item less is more: we can inspect the AST
+  \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \begin{itemize}
+  \item we are well equipped by now
+  \end{itemize}
+  \begin{minted}{scala}
+sealed abstract class FreeFun[F[_]]
+final case class Fmap(f: A => B, fa: FreeFun[A]) extends FreeFun[B]
+  \end{minted}
+\end{frame}
+
+\section{Freeing The Boolean Algebra}\label{sec:free-boolean-algebra}
+
 \begin{frame}
-  \frametitle{Colorful Boxes}
-  \begin{tcolorbox}[
-    fonttitle=\sffamily\bfseries\large,
-    colbacktitle=black,
-    colframe=black,
-    coltitle=beamer@centricgreen,
-    title=Hello World
-    ]
-    This is a \textbf{tcolorbox}.
-  \end{tcolorbox}
-  \begin{tcolorbox}[
-    fonttitle=\sffamily\bfseries\large,
-    colbacktitle=black,
-    colframe=black,
-    coltitle=beamer@codeblue,
-    title=Hello World
-    ]
-    This is a \textbf{tcolorbox}.
-  \end{tcolorbox}
-  \begin{tcolorbox}[
-    fonttitle=\sffamily\bfseries\large,
-    colbacktitle=black,
-    colframe=black,
-    title=Hello World
-    ]
-    This is a \textbf{tcolorbox}.
-  \end{tcolorbox}
+  \frame{Boolean Algebras}
+  \begin{itemize}
+  \item seen: common fp type classes
+  \item apply our knowledge to another example: boolean algebras
+  \end{itemize}
 \end{frame}
 
 \section{Conclusion}\label{sec:conclusion}

@@ -12,6 +12,7 @@ let
       lens
       pandoc
       shake
+      split
       text
       wreq
     ]
