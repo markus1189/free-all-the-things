@@ -9,6 +9,7 @@ let
       bytestring
       dhall
       hlint
+      HaTeX
       lens
       pandoc
       shake

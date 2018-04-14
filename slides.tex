@@ -123,14 +123,9 @@
   \begin{itemize}
   \item what are the operations?
   \end{itemize}
-    \begin{center}
-\begin{minted}{scala}
-trait Monad[F[_]] {
-  def pure[A](x: A): F[A]
-  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
-}
-\end{minted}
-\end{center}
+  \begin{center}
+    \inputminted{scala}{snippets/monad-typeclass.code}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]

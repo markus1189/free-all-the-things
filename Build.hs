@@ -5,13 +5,18 @@
 
 module Main where
 
-import Development.Shake
-import Development.Shake.FilePath
+import           Control.Monad (unless)
+import           Data.List (intercalate, isPrefixOf)
 import           Data.List.Split (chunksOf)
-import Data.Traversable (for)
-import Control.Monad (unless)
-import Data.List (intercalate, isPrefixOf)
-import Data.Monoid ((<>))
+import           Data.Maybe (mapMaybe)
+import           Data.Monoid ((<>))
+import qualified Data.Text as T
+import           Data.Traversable (for)
+import           Development.Shake
+import           Development.Shake.FilePath
+import           Text.LaTeX
+import           Text.LaTeX.Base.Parser
+import           Text.LaTeX.Base.Syntax
 
 main :: IO ()
 main = runShakeBuild
@@ -56,15 +61,17 @@ rules = do
   buildDir </> "font.tex" %> \_ -> dumpFontFile
 
   buildDir </> "*.tex" %> \out -> do
-    copyFileChanged (dropDirectory1 out) out
+    let inp = dropDirectory1 out
+    needsCode <- codeDeps inp
+    need needsCode
+    copyFileChanged inp out
 
   buildDir </> "*.sty" %> \out -> do
     copyFileChanged (dropDirectory1 out) out
 
-  buildDir </> "*.code" %> \out -> do
-    snip <- extractSnippet (out -<.> "snippet")
+  buildDir </> "snippets" </> "*.code" %> \out -> do
+    snip <- extractSnippet (dropDirectory1 $ out -<.> "snippet")
     writeFileLines out snip
-
 
 latexmk :: FilePath -> Action ()
 latexmk inp = do
@@ -78,7 +85,7 @@ latexmk inp = do
 
 dumpFontFile :: Action ()
 dumpFontFile = do
-  putNormal ("dumping file to " ++ (buildDir </> "font.tex"))
+  putQuiet ("Dumping font file to " ++ (buildDir </> "font.tex"))
   -- Guaranteed to be present via `shell.nix`, although this couples shake and nix...
 
   Just useCodecentricFont <- getEnv "USE_CC_FONT"
@@ -86,8 +93,35 @@ dumpFontFile = do
       outname = (buildDir </> "font.tex")
   copyFile' filename outname
 
+cmdArgs :: TeXArg -> Maybe Text
+cmdArgs (FixArg (TeXRaw arg)) = Just arg
+cmdArgs _ = Nothing
+
+commandDeps :: [String] -> FilePath -> Action [FilePath]
+commandDeps cmds file = do
+  etex <- liftIO (parseLaTeXFile file)
+  case etex of
+    Left err -> error ("Parsing of file " <> file <> " failed: " <> show err)
+    Right t -> do
+      let result = map T.unpack .
+                   mapMaybe cmdArgs .
+                   concatMap snd .
+                   matchCommand (`elem` cmds) $
+                   t
+      return result
+
+graphicDeps :: FilePath -> Action [FilePath]
+graphicDeps = commandDeps ["includegraphics"]
+
+codeDeps :: FilePath -> Action [FilePath]
+codeDeps file = do
+  deps <- map ("result" </>) . filter (/= "scala") <$> commandDeps ["inputminted"] file
+  putQuiet ("Discovered dependencies for '" <> file <> "': " <> show deps)
+  return deps
+
 extractSnippet :: FilePath -> Action [String]
 extractSnippet file = do
+  putQuiet ("Extracting from " <> file)
   snippets <- filter ((==3) . length) . chunksOf 3 <$> readFileLines file
   fmap concat . for snippets $ \ls -> do
     unless (length ls == 3) $
@@ -96,10 +130,10 @@ extractSnippet file = do
           ++ intercalate "\n"
                          (zipWith (\i line -> show i ++ ": " ++ line) [(1::Int)..] ls))
     let [sourceFile,startString,endString] = ls
-    lns <- readFileLines (takeDirectory file </> sourceFile)
+    lns <- readFileLines sourceFile
     let result = takeWhile (not . (endString `isPrefixOf`) . dropWhile (== ' '))
                . dropWhile (not . (startString `isPrefixOf`) . dropWhile (== ' '))
                $ lns
     if null result
       then error ("Empty snippet for:\n" <> file <> ":0:")
-      else return result
+      else return (drop 1 result)
