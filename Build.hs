@@ -71,8 +71,8 @@ rules = do
 
   buildDir </> "snippets" </> "*.scala" %> \out -> do
     snip <- extractSnippet (dropDirectory1 $ out -<.> "snippet")
-    writeFileLines out snip
-    scalaSyntax out
+    writeFileChanged out snip
+    checkScala out
     scalafmt out
 
 latexmk :: FilePath -> Action ()
@@ -85,14 +85,14 @@ latexmk inp = do
       ] bin ["-g", "-shell-escape", "-pdfxe", dropDirectory1 inp]
   where bin = "latexmk" :: String
 
-scalaSyntax :: FilePath -> Action ()
-scalaSyntax inp = do
-  cmd bin ["-Ystop-after:parse", inp]
+checkScala :: FilePath -> Action ()
+checkScala inp = do
+  cmd bin ["-Ystop-after:parser", inp]
   where bin = "scala" :: String
 
 scalafmt :: FilePath -> Action ()
 scalafmt inp = do
-  cmd bin [inp]
+  cmd bin ["--non-interactive", inp]
   where bin = "scalafmt" :: String
 
 dumpFontFile :: Action ()
@@ -131,7 +131,7 @@ codeDeps file = do
   putQuiet ("Discovered dependencies for '" <> file <> "': " <> show deps)
   return deps
 
-extractSnippet :: FilePath -> Action [String]
+extractSnippet :: FilePath -> Action String
 extractSnippet file = do
   putQuiet ("Extracting from " <> file)
   snippets <- filter ((==3) . length) . chunksOf 3 <$> readFileLines file
@@ -148,4 +148,4 @@ extractSnippet file = do
                $ lns
     if null result
       then error ("Empty snippet for:\n" <> file <> ":0:")
-      else return (drop 1 result)
+      else return (unlines (drop 1 result))
