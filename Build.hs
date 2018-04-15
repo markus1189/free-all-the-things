@@ -69,9 +69,11 @@ rules = do
   buildDir </> "*.sty" %> \out -> do
     copyFileChanged (dropDirectory1 out) out
 
-  buildDir </> "snippets" </> "*.code" %> \out -> do
+  buildDir </> "snippets" </> "*.scala" %> \out -> do
     snip <- extractSnippet (dropDirectory1 $ out -<.> "snippet")
     writeFileLines out snip
+    scalaSyntax out
+    scalafmt out
 
 latexmk :: FilePath -> Action ()
 latexmk inp = do
@@ -82,6 +84,16 @@ latexmk inp = do
       ,Stdin ""
       ] bin ["-g", "-shell-escape", "-pdfxe", dropDirectory1 inp]
   where bin = "latexmk" :: String
+
+scalaSyntax :: FilePath -> Action ()
+scalaSyntax inp = do
+  cmd bin ["-Ystop-after:parse", inp]
+  where bin = "scala" :: String
+
+scalafmt :: FilePath -> Action ()
+scalafmt inp = do
+  cmd bin [inp]
+  where bin = "scalafmt" :: String
 
 dumpFontFile :: Action ()
 dumpFontFile = do

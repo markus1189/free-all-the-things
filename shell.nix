@@ -65,6 +65,8 @@ in
       graphviz
       imagemagick
       latexPackages
+      scalafmt
+      scala
       unzip
       which
     ] ++ pyPackages;
