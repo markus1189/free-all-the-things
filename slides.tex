@@ -131,7 +131,8 @@
 \begin{frame}[fragile]
   \frametitle{Freeing The Monad}
 \begin{itemize}
-  \item what are the laws?
+\item what are the laws?
+\item (pseudocode)
 \end{itemize}
     \begin{center}
 \begin{minted}{scala}
@@ -160,38 +161,18 @@ fa.flatMap(f).flatMap(g) ===
 
 \begin{frame}[fragile]
   \frametitle{Freeing The Monad}
-    \begin{center}
-\begin{minted}{scala}
-trait Monad[F[_]] extends Applicative[F] {
-  def pure[A](x: A): F[A]
-  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
-}
-\end{minted}
-\vspace{1cm}
-\begin{minted}{scala}
-sealed abstract class Free[F[_], A]
-
-final case class Pure[F[_], A](a: A) extends Free[F, A]
-
-final case class FlatMap[F[_], A, B](
-  fa: Free[F, A], f: A => Free[F, B]) extends Free[F, B]
-  \end{minted}
-\end{center}
+  \begin{center}
+    \inputminted{scala}{snippets/monad-typeclass.scala}
+    \vspace{1cm}
+    \inputminted{scala}{snippets/free-monad.scala}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Freeing The Monad}
-    \begin{center}
-\begin{minted}{scala}
-implicit def freeMonad[F[_], A]: Monad[Free[F, A]] =
-  new Monad[Free[F, A]] {
-    def pure[A](x: A): Free[F, A] = Pure(x)
-
-    def flatMap[A, B](fa: Free[F, A])(
-      f: A => Free[F, B]): F[B] = FlatMap(fa, f)
-  }
-\end{minted}
-\end{center}
+  \begin{center}
+    \inputminted{scala}{snippets/free-instance.scala}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -201,10 +182,7 @@ implicit def freeMonad[F[_], A]: Monad[Free[F, A]] =
   \item clearly we are violating all of them!
   \item we need one more thing: the interpreter
   \end{itemize}
-  \begin{minted}{scala}
-def runFree[F[_], M[_]:Monad, A](
-  nat: FunctionK[F, M]): Free[F, A] => M[A] = ???
-  \end{minted}
+  \inputminted{scala}{snippets/free-interp.scala}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -258,12 +236,7 @@ runFree(nat)(pure(a).flatMap(f)) ===
 
 \begin{frame}[fragile]
   \frametitle{The Applicative Class}
-  \begin{minted}{scala}
-trait Applicative[F[_]] extends Functor[F] {
-  def pure[A](x: A): F[A]
-  def ap[A](fab: F[A => B], fa: F[A]): F[B]
-}
-  \end{minted}
+  \inputminted{scala}{snippets/applicative-typeclass.scala}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -271,10 +244,8 @@ trait Applicative[F[_]] extends Functor[F] {
   \begin{itemize}
   \item again the same pattern: we model it as an ADT
   \end{itemize}
+    \inputminted{scala}{snippets/free-applicative.scala}
   \begin{minted}{scala}
-sealed abstract class FreeAp[F[_]]
-final case class Pure[F[_], A](a: A) extends FreeAp[F, A]
-final case class Ap[F[_], A, B](fab: FreeAp[F, A => B], fa: FreeAp[F, A]) extends FreeAp[F, B]
 \end{minted}
 \begin{itemize}
 \item of course we also need the interpreter

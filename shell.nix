@@ -65,6 +65,7 @@ in
       graphviz
       imagemagick
       latexPackages
+      sbt
       scalafmt
       scala
       unzip

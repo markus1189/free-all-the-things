@@ -2,6 +2,8 @@
 -- #! nix-shell deps.nix -i "ghci -fdefer-type-errors"
 #! nix-shell shell.nix -i "runhaskell --ghc-arg=-threaded --ghc-arg=-Wall"
 #! nix-shell --pure
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Main where
 
@@ -12,11 +14,18 @@ import           Data.Maybe (mapMaybe)
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
 import           Data.Traversable (for)
+import           Development.Shake.Classes
 import           Development.Shake
 import           Development.Shake.FilePath
 import           Text.LaTeX
 import           Text.LaTeX.Base.Parser
 import           Text.LaTeX.Base.Syntax
+
+newtype ScalaOptions = ScalaOptions () deriving (Show,Typeable,Eq,Hashable,Binary,NFData)
+type instance RuleResult ScalaOptions = [String]
+
+newtype ScalafmtOptions = ScalafmtOptions () deriving (Show,Typeable,Eq,Hashable,Binary,NFData)
+type instance RuleResult ScalafmtOptions = [String]
 
 main :: IO ()
 main = runShakeBuild
@@ -33,9 +42,11 @@ myShakeOptions = shakeOptions { shakeLint = Just LintBasic
 
 runShakeBuild :: IO ()
 runShakeBuild = shakeArgs myShakeOptions $ do
+  addOracles
+  projectCompiler <- addProjectCompiler
   wantTargets
   phonyCommands
-  rules
+  rules projectCompiler
 
 wantTargets :: Rules ()
 wantTargets = do
@@ -45,8 +56,28 @@ phonyCommands :: Rules ()
 phonyCommands = do
   phony "clean" (removeFilesAfter buildDir ["//*"])
 
-rules :: Rules ()
-rules = do
+addOracles :: Rules ()
+addOracles = do
+  _ <- addOracle $ \(ScalaOptions _) -> return ["-Ystop-after:namer"
+                                               ,"-feature"
+                                               ,"-deprecation"
+                                               ,"-language:higherKinds"
+                                               ,"-Xlint"
+                                               ]
+  _ <- addOracle $ \(ScalafmtOptions _) -> return ["--non-interactive"
+                                                  ,"--quiet"
+                                                  ,"--no-stderr"
+                                                  ,"--config-str"
+                                                  ,"maxColumn = 60"
+                                                  ]
+  return ()
+
+addProjectCompiler :: Rules (() -> Action ())
+addProjectCompiler = do
+  newCache $ \() -> cmd [Cwd "source-code"] "sbt" ["compile"]
+
+rules :: (() -> Action ()) -> Rules ()
+rules projectCompiler = do
   buildDir </> "slides.pdf" %> \out -> do
     let inp = out -<.> "tex"
         theme = map (buildDir </>) ["beamercolorthemecodecentric.sty"
@@ -70,6 +101,7 @@ rules = do
     copyFileChanged (dropDirectory1 out) out
 
   buildDir </> "snippets" </> "*.scala" %> \out -> do
+    _ <- projectCompiler ()
     snip <- extractSnippet (dropDirectory1 $ out -<.> "snippet")
     writeFileChanged out snip
     checkScala out
@@ -87,12 +119,14 @@ latexmk inp = do
 
 checkScala :: FilePath -> Action ()
 checkScala inp = do
-  cmd bin ["-Ystop-after:parser", inp]
+  opts <- askOracle (ScalaOptions ())
+  cmd bin (opts ++ [inp])
   where bin = "scala" :: String
 
 scalafmt :: FilePath -> Action ()
 scalafmt inp = do
-  cmd bin ["--non-interactive", inp]
+  opts <- askOracle (ScalafmtOptions ())
+  cmd [EchoStdout False, EchoStderr False] bin (opts ++ [inp])
   where bin = "scalafmt" :: String
 
 dumpFontFile :: Action ()
