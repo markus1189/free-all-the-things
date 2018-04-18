@@ -54,21 +54,19 @@ case class Greater(value: Int) extends Predicate
 case class LessThan(value: Int) extends Predicate
 case class Equals(value: Int) extends Predicate
 
-trait Monoid[A] {
-  def empty: A
-  def combine(a: A, b: A): A
-}
+object FreeBoolDsl {
+  import FreeBool._
 
-object FreeMonoid {
-  sealed trait FM[+A]
-  case object Empty extends FM[Nothing]
-  case class Combine[A](lhs: A, rhs: FM[A]) extends FM[A]
-}
+  val predicate = Not(And(Gen(Greater(5)), Gen(LessThan(10))))
 
-/*
-Definition: free bool algebra. A free bool algebra on type Int is an
-object F[Int] such that F is a boolean algebra, and a function i ::
-Int -> F[Int] such that any other boolean algebra S and a function f
-:: Int -> S there exists a unique boolean algebra morphism f' such
-that f' . i = f.
- */
+
+  def evalInt(input: Int)(pred: FreeBool[Predicate]): Boolean = {
+    def f(p: Predicate): Boolean = p match {
+      case Greater(lowerBound) => input > lowerBound
+      case LessThan(upperBound) => input < upperBound
+      case Equals(expected) => input == expected
+    }
+
+    interp(f, pred)
+  }
+}
