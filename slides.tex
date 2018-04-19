@@ -206,6 +206,23 @@ runFree(nat)(pure(a).flatMap(f)) ===
 \end{frame}
 
 \begin{frame}
+  \frametitle{Use Cases}
+  \begin{itemize}
+  \item DSL with monadic expressiveness
+  \item branching, loops, basically everything
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Axis of Power}
+  \begin{itemize}
+  \item this is our base
+  \item a lot of expressiveness in the DSL
+  \item at the cost of the things you can do in the interpreter
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{Freeing The Monad}
   \begin{itemize}
   \item that's it for the Monad
@@ -265,13 +282,40 @@ runFree(nat)(pure(a).flatMap(f)) ===
   \begin{itemize}
   \item we are well equipped by now
   \end{itemize}
-  \begin{minted}{scala}
-sealed abstract class FreeFun[F[_]]
-final case class Fmap(f: A => B, fa: FreeFun[A]) extends FreeFun[B]
-  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \inputminted{scala}{snippets/free-functor.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \begin{itemize}
+  \item clean code alarm: only one subclass
+  \item can we get rid of it?
+  \end{itemize}
 \end{frame}
 
 \section{Freeing The Boolean Algebra}\label{sec:free-boolean-algebra}
+
+\begin{frame}
+  \frametitle{Disclaimer}
+  \begin{itemize}
+  \item Once upon a time: https://engineering.wingify.com/posts/Free-objects/
+  \item really awesome article about free objects
+  \item use free boolean algebra to define DSL for event predicates
+  \item all credits to Chris Stucchio (@stucchio)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Boolean Algebra}
+  \begin{itemize}
+  \item Wikipedia: boolean algebra + set of generators
+  \item let's go
+  \end{itemize}
+\end{frame}
 
 \begin{frame}
   \frame{Boolean Algebras}
