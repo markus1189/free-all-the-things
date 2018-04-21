@@ -60,6 +60,7 @@ in
 
     buildInputs = [
       coreutils
+      ditaa
       eject
       ghcPackages
       graphviz

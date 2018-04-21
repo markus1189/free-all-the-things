@@ -27,6 +27,9 @@ type instance RuleResult ScalaOptions = [String]
 newtype ScalafmtOptions = ScalafmtOptions () deriving (Show,Typeable,Eq,Hashable,Binary,NFData)
 type instance RuleResult ScalafmtOptions = [String]
 
+newtype DitaaOptions = DitaaOptions () deriving (Show,Typeable,Eq,Hashable,Binary,NFData)
+type instance RuleResult DitaaOptions = [String]
+
 main :: IO ()
 main = runShakeBuild
 
@@ -70,6 +73,10 @@ addOracles = do
                                                   ,"--config-str"
                                                   ,"maxColumn = 60"
                                                   ]
+  _ <- addOracle $ \(DitaaOptions _) -> return ["--scale"
+                                               ,"3"
+                                               ,"--overwrite"
+                                               ]
   return ()
 
 addProjectCompiler :: Rules (() -> Action ())
@@ -94,7 +101,8 @@ rules projectCompiler = do
   buildDir </> "*.tex" %> \out -> do
     let inp = dropDirectory1 out
     needsCode <- codeDeps inp
-    need needsCode
+    needsGraphics <- graphicDeps inp
+    need (needsCode ++ needsGraphics)
     copyFileChanged inp out
 
   buildDir </> "*.sty" %> \out -> do
@@ -106,6 +114,16 @@ rules projectCompiler = do
     writeFileChanged out snip
     checkScala out
     scalafmt out
+
+  buildDir </> "ditaa/*.png" %> \out -> do
+    let inp = dropDirectory1 out -<.> "ditaa"
+    ditaa inp out
+
+ditaa :: FilePath -> FilePath -> Action ()
+ditaa inp outp = do
+  opts <- askOracle (DitaaOptions ())
+  cmd bin ([inp, outp] ++ opts)
+  where bin = "ditaa" :: String
 
 latexmk :: FilePath -> Action ()
 latexmk inp = do
@@ -157,11 +175,11 @@ commandDeps cmds file = do
       return result
 
 graphicDeps :: FilePath -> Action [FilePath]
-graphicDeps = commandDeps ["includegraphics"]
+graphicDeps file = map (buildDir </>) <$> commandDeps ["includegraphics"] file
 
 codeDeps :: FilePath -> Action [FilePath]
 codeDeps file = do
-  deps <- map ("result" </>) . filter (/= "scala") <$> commandDeps ["inputminted"] file
+  deps <- map (buildDir </>) . filter (/= "scala") <$> commandDeps ["inputminted"] file
   putQuiet ("Discovered dependencies for '" <> file <> "': " <> show deps)
   return deps
 
