@@ -47,6 +47,13 @@ object FreeBool {
     case Fls => BooleanAlgebra[B].fls
     case Gen(v) => f(v)
   }
+
+  def lift[A](v: A): FreeBool[A] = FreeBool.Gen(v)
+  def and[A](lhs: FreeBool[A], rhs: FreeBool[A]): FreeBool[A] = And(lhs, rhs)
+  def or[A](lhs: FreeBool[A], rhs: FreeBool[A]): FreeBool[A] = Or(lhs, rhs)
+  def not[A](fb: FreeBool[A]): FreeBool[A] = Not(fb)
+  val tru: FreeBool[Nothing] = Tru
+  val fls: FreeBool[Nothing] = Fls
 }
 
 sealed trait Predicate
