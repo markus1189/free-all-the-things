@@ -244,13 +244,9 @@ fa.flatMap(f).flatMap(g) ===
   \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \frametitle{So What?}
-  \begin{itemize}
-  \item the laws tell us what ``rewriting'' is possible
-  \item here: \textbf{flatMap} has to be associative, that means we can re-associate
-  \item why? Let's look at what happens with normal \textbf{flatMap}s
-  \end{itemize}
+\begin{frame}[fragile]
+  \frametitle{Faster Free Monads}
+  \inputminted{scala}{snippets/opt-free-instance.scala}
 \end{frame}
 
 \begin{frame}
