@@ -14,9 +14,10 @@ import           Data.Maybe (mapMaybe)
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
 import           Data.Traversable (for)
-import           Development.Shake.Classes
 import           Development.Shake
+import           Development.Shake.Classes
 import           Development.Shake.FilePath
+import qualified System.IO as IO
 import           Text.LaTeX
 import           Text.LaTeX.Base.Parser
 import           Text.LaTeX.Base.Syntax
@@ -70,8 +71,9 @@ addOracles = do
   _ <- addOracle $ \(ScalafmtOptions _) -> return ["--non-interactive"
                                                   ,"--quiet"
                                                   ,"--no-stderr"
+                                                  ,"--stdout"
                                                   ,"--config-str"
-                                                  ,"maxColumn = 60"
+                                                  ,"maxColumn = 55"
                                                   ]
   _ <- addOracle $ \(DitaaOptions _) -> return ["--scale"
                                                ,"3"
@@ -119,6 +121,10 @@ rules projectCompiler = do
     let inp = dropDirectory1 out -<.> "ditaa"
     ditaa inp out
 
+  buildDir </> "static-images/*" %> \out -> do
+    let inp = dropDirectory1 out
+    copyFileChanged inp out
+
 ditaa :: FilePath -> FilePath -> Action ()
 ditaa inp outp = do
   opts <- askOracle (DitaaOptions ())
@@ -144,7 +150,13 @@ checkScala inp = do
 scalafmt :: FilePath -> Action ()
 scalafmt inp = do
   opts <- askOracle (ScalafmtOptions ())
-  cmd [EchoStdout False, EchoStderr False] bin (opts ++ [inp])
+  contents <- liftIO (IO.readFile inp)
+  withTempFile $ \temp -> do
+    let wrapped = unlines $ "object ObjForScalafmt {" : lines contents ++ ["}"]
+    liftIO $ IO.writeFile temp wrapped
+    Stdout stdout <- cmd [EchoStdout False, EchoStderr False] bin (opts ++ [temp])
+    let output = unlines (init (drop 1 (lines stdout)))
+    liftIO $ IO.writeFile inp output
   where bin = "scalafmt" :: String
 
 dumpFontFile :: Action ()
