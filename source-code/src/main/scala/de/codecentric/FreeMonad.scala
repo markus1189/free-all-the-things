@@ -3,6 +3,7 @@ package de.codecentric
 //snippet:monad typeclass
 trait Monad[F[_]] {
   def pure[A](x: A): F[A]
+
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 }
 //end
@@ -13,24 +14,23 @@ object Monad {
 
 object FreeMonad {
   //snippet:free monad
-  sealed abstract class Free[F[_], +A]
+  sealed abstract class Free[F[_], A]
 
   final case class Pure[F[_], A](a: A) extends Free[F, A]
 
-  final case class FlatMap[F[_], A, B](
-    fa: Free[F, A], f: A => Free[F, B]) extends Free[F, B]
-  //end
+  final case class FlatMap[F[_], A, B](fa: Free[F, A], f: A => Free[F, B]) extends Free[F, B]
 
-  implicit def freeMonadFunctor[F[_]]: Functor[Free[F, ?]] = new Functor[Free[F, ?]] {
-    def map[A, B](fa: Free[F, A])(f: A => B): Free[F, B] = fa match {
-      case Pure(x) => Pure(f(x))
-      case FlatMap(ffa, g) => FlatMap(ffa, (x: Any) => Functor[Free[F, ?]].map(g(x))(f))
-    }
-  }
+  final case class Inject[F[_], A](fa: F[A]) extends Free[F, A]
+  //end
 }
 
 object FreeInstance {
   import FreeMonad._
+
+  implicit def freeMonadFunctor[F[_]]: Functor[Free[F, ?]] = new Functor[Free[F, ?]] {
+    def map[A, B](fa: Free[F, A])(f: A => B): Free[F, B] = Monad[Free[F, ?]].flatMap(fa)(a => Pure(f(a)))
+  }
+
   //snippet:free instance
   implicit def freeMonad[F[_], A]: Monad[Free[F, ?]] =
     new Monad[Free[F, ?]] {
@@ -45,12 +45,13 @@ object FreeInstance {
 object FreeInstanceOpt {
   import FreeMonad._
   //snippet:opt free instance
-  implicit def freeMonadOpt[F[_], A]: Monad[Free[F, ?]] =
+  implicit def freeMonadOpt[F[_]: Functor, A]: Monad[Free[F, ?]] =
     new Monad[Free[F, ?]] {
       def pure[A](x: A): Free[F, A] = Pure(x)
 
       def flatMap[A, B](fa: Free[F, A])(f: A => Free[F, B]): Free[F, B] = fa match {
         case Pure(x) => f(x)
+        case Inject(fa) => FlatMap(Inject(fa), f)
         case FlatMap(ga, g) =>
           FlatMap(ga, (a: Any) => FlatMap(g(a), f))
       }
@@ -76,6 +77,7 @@ object FreeInterpreter {
   def runFree[F[_], M[_]:Monad, A](
     nat: FunctionK[F, M])(free: Free[F, A]): M[A] = free match {
     case Pure(x) => Monad[M].pure(x)
+    case Inject(fa) => nat(fa)
     case FlatMap(fa, f) =>
       Monad[M].flatMap(runFree(nat)(fa))(x => runFree(nat)(f(x)))
   }
