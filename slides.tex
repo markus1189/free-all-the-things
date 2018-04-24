@@ -36,6 +36,7 @@
   \item create an AST for ops + vars
   \item provide a function to ``inject'' things
   \item define an interpreter that eliminates the AST (homomorphism)
+  \item look at the laws
   \end{itemize}
 }
 
@@ -200,8 +201,8 @@ fa.flatMap(f).flatMap(g) ===
   \frametitle{What about the laws?}
   \begin{minted}{scala}
 // The associativity law
-fa.flatMap(f).flatMap(g) ===
-  fa.flatMap(a => f(a).flatMap(g))
+FlatMap(FlatMap(fa, f), g) ===
+  FlatMap(fa, a => FlatMap(f(a), g))
   \end{minted}
   \vfill{}
   \inputminted[autogobble]{scala}{snippets/what-about-laws.scala}
@@ -249,8 +250,6 @@ fa.flatMap(f).flatMap(g) ===
 \end{frame}
 
 \section{Freeing The Applicative}\label{sec:free-applicative}
-
-\section{Freeing The Monad}\label{sec:free-monad}
 \begin{frame}
   \begin{center}
     \Huge
@@ -281,16 +280,28 @@ fa.flatMap(f).flatMap(g) ===
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Freeing The Applicative}
-  \begin{itemize}
-  \item again the same pattern: we model it as an ADT
-  \end{itemize}
+  \frametitle{AST for FreeApplicative}
     \inputminted{scala}{snippets/free-applicative.scala}
   \begin{minted}[autogobble]{scala}
 \end{minted}
-\begin{itemize}
-\item of course we also need the interpreter
-\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Laws}
+\begin{minted}[autogobble]{scala}
+// identity
+Ap(Pure(identity), v) === v
+
+// composition
+Ap(Ap(Ap(Pure(_.compose), u), v), w) ===
+  Ap(u, Ap(v, w))
+
+// homomorphism
+Ap(Pure(f), Pure(x)) === Pure(f(x))
+
+// interchange
+Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
+\end{minted}
 \end{frame}
 
 \begin{frame}

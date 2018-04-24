@@ -19,3 +19,14 @@ object FreeAp {
   final case class Inject[F[_], A](fa: F[A]) extends FreeAp[F, A]
   //end
 }
+
+object FreeApInstance {
+  import FreeAp._
+  //snippet:instance freeap
+  implicit def freeApApplicative[F[_]]: Applicative[FreeAp[F, ?]] = new Applicative[FreeAp[F, ?]] {
+    def pure[A](x: A) = Pure(x)
+
+    def ap[A, B](fab: FreeAp[F, A => B], fa: FreeAp[F, A]): FreeAp[F, B] = Ap(fab, fa)
+  }
+  //end
+}
