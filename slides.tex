@@ -31,6 +31,14 @@
 \title{Free All The Things}
 \author{Markus Hauck}
 
+\newcommand{\recipe}{%
+  \begin{itemize}
+  \item create an AST for ops + vars
+  \item provide a function to ``inject'' things
+  \item define an interpreter that eliminates the AST (homomorphism)
+  \end{itemize}
+}
+
 % The presentation content
 \begin{document}
 
@@ -59,11 +67,9 @@
     \item Monad
     \item Applicative
     \item Functor
-    \item Boolean Algebra
     \item other?
     \end{itemize}
   \item Goal: explain the technique behind ``Free X''
-  \item Be able to apply the ``pattern'' yourself
   \end{itemize}
 \end{frame}
 
@@ -72,11 +78,15 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{What Is Free}
-  A free functor is left adjoint to a forgetful functor
-  \vspace{1cm}
+  \frametitle{What's The Problem}
   \begin{center}
-    What's the problem?
+    A free functor is left adjoint to a forgetful functor
+  \end{center}
+  \begin{center}
+    what's the problem?
+  \end{center}
+  \begin{center}
+    \includegraphics[width=0.3\textwidth]{static-images/smirk.png}
   \end{center}
 \end{frame}
 
@@ -86,7 +96,7 @@
   \begin{minted}[linenos=false]{scala}
     def inject(x: A): FreeA
   \end{minted}
-  s. t. for any other ``thing'' \textit{B} and a function
+  such that for any other ``thing'' \textit{B} and a function
   \begin{minted}[linenos=false]{scala}
     val f: A => B
   \end{minted}
@@ -99,68 +109,48 @@
 \begin{frame}[fragile]
   \frametitle{What Is Free}
   \begin{itemize}
-  \item the good news: there is a recipe
-    \begin{enumerate}
-    \item create an AST for ops + vars
-    \item modify it such that laws ensured during construction*
-    \end{enumerate}
+  \item still sounds complicated?
+  \item there is a recipe
+    \recipe{}
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Why Free}
   \begin{itemize}
-  \item having a Free X is good for a number of reasons
   \item use Free X as if it was X
-  \item but the program is reified into some (data-)structure
-  \item this structure can often be analyzed and optimized
-  \item many interpreters of the same program
+  \item program reified into (data-)structure
+  \item structure can be analyzed/optimized
+  \item one program \textemdash{} many interpretations
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Scales of Power}
+  \frametitle{Disclaimer Before We Start}
   \begin{itemize}
-  \item the structures we will look at, are able to capture computations that have different power abilities
-  \item monad: depend on previous values and branching
-  \item applicative: fixed structure with arbitrary applicative effects in between
-  \item functor: apply a function to the content
-  \item monoid: limited power, but very flexible and composable
-  \item surprise
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Disclaimer}
-  \begin{itemize}
-  \item we will mostly look at the data structure version of Free X
-  \item the alternative is to use finally tagless representations (Next Talk)
+  \item this talk: deep embeddings / initial encoding / data structure representation
+  \item alternative: finally tagless
+  \item not this talk: optimization of free structures
   \end{itemize}
 \end{frame}
 
 \section{Freeing The Monad}\label{sec:free-monad}
 \begin{frame}
   \begin{center}
+    \Huge
     Freeing The Monad
   \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Freeing The Monad}
-  \begin{itemize}
-  \item what are the operations?
-  \end{itemize}
+  \frametitle{Monad Operations}
   \begin{center}
     \inputminted{scala}{snippets/monad-typeclass.scala}
   \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Freeing The Monad}
-\begin{itemize}
-\item what are the laws?
-\item (pseudocode)
-\end{itemize}
+  \frametitle{Give Me The Laws}
     \begin{center}
 \begin{minted}[autogobble]{scala}
 // Left identity
@@ -177,20 +167,19 @@ fa.flatMap(f).flatMap(g) ===
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Freeing The Monad}
+  \frametitle{Applying The Recipe}
+  \begin{center}
+    \inputminted{scala}{snippets/monad-typeclass.scala}
+  \end{center}
   \begin{itemize}
-  \item todo: the minimal ``thing'' that has a \textit{Monad} instance
-    \textbf{satisfies} the laws
-  \item simple idea: capture as data
-  \item any minimal combination works
+  \item now comes our recipe
+    \recipe{}
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Freeing The Monad}
   \begin{center}
-    \inputminted{scala}{snippets/monad-typeclass.scala}
-    \vspace{1cm}
     \inputminted{scala}{snippets/free-monad.scala}
   \end{center}
 \end{frame}
@@ -214,13 +203,14 @@ fa.flatMap(f).flatMap(g) ===
 fa.flatMap(f).flatMap(g) ===
   fa.flatMap(a => f(a).flatMap(g))
   \end{minted}
+  \vfill{}
   \inputminted[autogobble]{scala}{snippets/what-about-laws.scala}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{What about the laws?}
   \begin{center}
-    \includegraphics[width=0.6\textwidth]{static-images/scream.png}
+    \includegraphics[width=0.3\textwidth]{static-images/scream.png}
   \end{center}
 \end{frame}
 
@@ -230,70 +220,59 @@ fa.flatMap(f).flatMap(g) ===
   \item actually, we don't satisfy them
   \item programmer: after interpretation it's no longer visible
   \item mathematician: that's not the free monad!
-  \item use them to make it faster
   \item tradeoff: during construction vs during interpretation
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Faster Free Monads}
+  \frametitle{The Right Free Monad}
   \begin{itemize}
-  \item common optimization: associate \texttt{flatMap}'s to the right
+  \item common transformation: associate \texttt{flatMap}'s to the right
   \item avoids having to rebuild the tree repeatedly during construction
   \item how: during construction time
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Faster Free Monads}
-  \inputminted{scala}{snippets/opt-free-instance.scala}
+  \frametitle{Transforming Free Monads}
+  \inputminted[highlightlines={5-6}, highlightcolor=yellow]{scala}{snippets/opt-free-instance.scala}
 \end{frame}
 
 \begin{frame}
   \frametitle{Use Cases}
   \begin{itemize}
   \item DSL with monadic expressiveness
-  \item branching, loops, basically everything
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Tradeoffs}
-  \includegraphics[width=\textwidth]{ditaa/diagram-all.png}
-  \begin{itemize}
-  \item this is our base
-  \item a lot of expressiveness in the DSL
-  \item at the cost of the things you can do in the interpreter
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Freeing The Monad}
-  \begin{itemize}
-  \item that's it for the Monad
-  \item what else?
+  \item context sensitive, branching, loops, fancy control flow
+  \item familiarity with monadic style for DSL
+  \item big drawback: interpreter has limited possibilities
   \end{itemize}
 \end{frame}
 
 \section{Freeing The Applicative}\label{sec:free-applicative}
+
+\section{Freeing The Monad}\label{sec:free-monad}
+\begin{frame}
+  \begin{center}
+    \Huge
+    Freeing The Applicative
+  \end{center}
+\end{frame}
 
 \begin{frame}
   \frametitle{Freeing The Applicative}
   \begin{itemize}
   \item free monads are great, but also limited
   \item we can't analyze the programs
-  \item how about a smaller gun?
+  \item how about a smaller abstraction?
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Freeing The Applicative}
+  \frametitle{Recall}
   \begin{itemize}
   \item we follow the same pattern
-  \item look at typeclass operations
-  \item create datastructure
-  \item ``interpreter''
   \end{itemize}
+  \recipe{}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -371,6 +350,16 @@ fa.flatMap(f).flatMap(g) ===
 \end{frame}
 
 \section{Conclusion}\label{sec:conclusion}
+
+\begin{frame}
+  \frametitle{Tradeoffs}
+  \includegraphics[width=\textwidth]{ditaa/diagram-all.png}
+  \begin{itemize}
+  \item this is our base
+  \item a lot of expressiveness in the DSL
+  \item at the cost of the things you can do in the interpreter
+  \end{itemize}
+\end{frame}
 
 \begin{frame}
   \begin{center}

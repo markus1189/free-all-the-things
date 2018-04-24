@@ -9,5 +9,5 @@ lazy val root = (project in file(".")).
     )),
     name := "free-all-the-things",
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
-    scalacOptions ++= Seq("-feature", "-language:higherKinds")
+    scalacOptions ++= Seq("-feature", "-language:higherKinds", "-language:implicitConversions")
   )
