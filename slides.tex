@@ -305,42 +305,84 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
 \end{frame}
 
 \begin{frame}
-  \frametitle{Less Power?!}
+  \frametitle{Don't Forget The Laws}
+  \inputminted{scala}{snippets/opt-free-ap-instance.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Running FreeApplicatives}
+  \inputminted{scala}{snippets/freeap-interp.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example}
+\end{frame}
+
+\section{Freeing The Functor}\label{sec:free-functor}
+\begin{frame}
+  \begin{center}
+    \Huge
+    Freeing The Functor
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{And Once Again}
+  \recipe{}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \inputminted{scala}{snippets/functor-typeclass.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \inputminted{scala}{snippets/free-functor1.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \inputminted{scala}{snippets/free-functor2.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Clean Code Police}
+  \begin{center}
+    \includegraphics[width=0.3\textwidth]{static-images/police.png}
+  \end{center}
   \begin{itemize}
-  \item why would we consider Applicative if it's less powerful?
-  \item less is more: we can inspect the AST
+  \item only one subclass?
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Freeing The Functor}
-  \begin{itemize}
-  \item we are well equipped by now
-  \end{itemize}
+  \inputminted{scala}{snippets/free-functor3.scala}
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Freeing The Functor}
-  \inputminted{scala}{snippets/free-functor.scala}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Freeing The Functor}
-  \begin{itemize}
-  \item clean code alarm: only one subclass
-  \item can we get rid of it?
-  \end{itemize}
+  \inputminted{scala}{snippets/free-functor4.scala}
 \end{frame}
 
 \section{Freeing The Boolean Algebra}\label{sec:free-boolean-algebra}
 
 \begin{frame}
+  \frametitle{Now That We Can Free Anything}
+  \begin{center}
+    \includegraphics[width=0.3\textwidth]{static-images/thinking.png}
+    \vfill
+    \Huge What should we free?
+  \end{center}
+\end{frame}
+
+\begin{frame}
   \frametitle{Disclaimer}
   \begin{itemize}
   \item Once upon a time: https://engineering.wingify.com/posts/Free-objects/
-  \item really awesome article about free objects
   \item use free boolean algebra to define DSL for event predicates
-  \item all credits to Chris Stucchio (@stucchio)
+  \item credits to Chris Stucchio (@stucchio)
   \end{itemize}
 \end{frame}
 
@@ -348,35 +390,59 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
   \frametitle{Free Boolean Algebra}
   \begin{itemize}
   \item Wikipedia: boolean algebra + set of generators
-  \item let's go
+  \item we know what to do, so let's go!
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frame{Boolean Algebras}
+  \frametitle{Boolean Algebras}
+  \inputminted{scala}{snippets/boolean-algebra.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Boolean Algebra}
+  \inputminted{scala}{snippets/free-bool.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Boolean Algebra}
+  \inputminted{scala}{snippets/free-bool-interp.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{And What Now?}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Boolean Algebra}
   \begin{itemize}
-  \item seen: common fp type classes
-  \item apply our knowledge to another example: boolean algebras
+  \item good example of underused free structure
+  \item partial evaluation
+  \item serialize the AST (JSON, Protobuf, Avro, \ldots{})
+  \item exercise: minimize AST representation
   \end{itemize}
 \end{frame}
 
 \section{Conclusion}\label{sec:conclusion}
 
 \begin{frame}
-  \frametitle{Tradeoffs}
-  \includegraphics[width=\textwidth]{ditaa/diagram-all.png}
-  \begin{itemize}
-  \item this is our base
-  \item a lot of expressiveness in the DSL
-  \item at the cost of the things you can do in the interpreter
-  \end{itemize}
+  \begin{center}
+    \Huge
+    Go And Free All The Things!
+  \end{center}
 \end{frame}
 
 \begin{frame}
-  \begin{center}
-    \huge
-    Your conclusion here
-  \end{center}
+  \tableofcontents{}
+\end{frame}
+
+\section{Bonus}\label{sec:bonus}
+
+\begin{frame}
+  \frametitle{Can We Minimize Our ASTs?}
+  \begin{itemize}
+  \item remove \texttt{Inject} cases from Monad and Applicative
+  \end{itemize}
 \end{frame}
 
 \end{document}

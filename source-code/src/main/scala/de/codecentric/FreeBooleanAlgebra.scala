@@ -1,7 +1,7 @@
 package de.codecentric
 
 //snippet:boolean algebra
-trait BooleanAlgebra[A] {
+trait BoolAlgebra[A] {
   def tru: A
   def fls: A
 
@@ -12,10 +12,10 @@ trait BooleanAlgebra[A] {
 }
 //end
 
-object BooleanAlgebra {
-  def apply[A](implicit B: BooleanAlgebra[A]): BooleanAlgebra[A] = B
+object BoolAlgebra {
+  def apply[A](implicit B: BoolAlgebra[A]): BoolAlgebra[A] = B
 
-  implicit val bool: BooleanAlgebra[Boolean] = new BooleanAlgebra[Boolean] {
+  implicit val bool: BoolAlgebra[Boolean] = new BoolAlgebra[Boolean] {
     def tru: Boolean = true
     def fls: Boolean = false
 
@@ -27,28 +27,32 @@ object BooleanAlgebra {
 }
 
 object FreeBool {
+  //snippet:free bool
   sealed abstract class FreeBool[+A]
 
-  final case object Tru extends FreeBool[Nothing]
-  final case object Fls extends FreeBool[Nothing]
+  case object Tru extends FreeBool[Nothing]
+  case object Fls extends FreeBool[Nothing]
 
-  final case class Not[A](value: FreeBool[A]) extends FreeBool[A]
+  case class Not[A](value: FreeBool[A]) extends FreeBool[A]
+  case class And[A](lhs: FreeBool[A], rhs: FreeBool[A]) extends FreeBool[A]
+  case class Or[A](lhs: FreeBool[A], rhs: FreeBool[A]) extends FreeBool[A]
+  case class Inject[A](value: A) extends FreeBool[A]
+  //end
 
-  final case class And[A](lhs: FreeBool[A], rhs: FreeBool[A]) extends FreeBool[A]
-  final case class Or[A](lhs: FreeBool[A], rhs: FreeBool[A]) extends FreeBool[A]
-
-  final case class Gen[A](value: A) extends FreeBool[A]
-
-  def interp[A,B:BooleanAlgebra](f: A => B, fb: FreeBool[A]): B = fb match {
-    case Not(v) => BooleanAlgebra[B].not(interp(f, v))
-    case And(lhs, rhs) => BooleanAlgebra[B].and(interp(f, lhs), interp(f, rhs))
-    case Or(lhs, rhs) => BooleanAlgebra[B].or(interp(f, lhs), interp(f, rhs))
-    case Tru => BooleanAlgebra[B].tru
-    case Fls => BooleanAlgebra[B].fls
-    case Gen(v) => f(v)
+  //snippet:free bool interp
+  def runFreeBool[A,B](f: A => B, fb: FreeBool[A])(implicit B: BoolAlgebra[B]): B = {
+    fb match {
+      case Tru => B.tru
+      case Fls => B.fls
+      case Inject(v) => f(v)
+      case Not(v) => B.not(runFreeBool(f, v))
+      case Or(lhs, rhs) => B.or(runFreeBool(f, lhs), runFreeBool(f, rhs))
+      case And(lhs, rhs) => B.and(runFreeBool(f, lhs), runFreeBool(f, rhs))
+    }
   }
+  //end
 
-  def lift[A](v: A): FreeBool[A] = FreeBool.Gen(v)
+  def lift[A](v: A): FreeBool[A] = FreeBool.Inject(v)
   def and[A](lhs: FreeBool[A], rhs: FreeBool[A]): FreeBool[A] = And(lhs, rhs)
   def or[A](lhs: FreeBool[A], rhs: FreeBool[A]): FreeBool[A] = Or(lhs, rhs)
   def not[A](fb: FreeBool[A]): FreeBool[A] = Not(fb)
@@ -64,7 +68,7 @@ case class Equals(value: Int) extends Predicate
 object FreeBoolDsl {
   import FreeBool._
 
-  val predicate = Not(And(Gen(Greater(5)), Gen(LessThan(10))))
+  val predicate = Not(And(Inject(Greater(5)), Inject(LessThan(10))))
 
 
   def evalInt(input: Int)(pred: FreeBool[Predicate]): Boolean = {
@@ -74,6 +78,6 @@ object FreeBoolDsl {
       case Equals(expected) => input == expected
     }
 
-    interp(f, pred)
+    runFreeBool(f, pred)
   }
 }
