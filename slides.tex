@@ -410,6 +410,41 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
 \end{frame}
 
 \begin{frame}
+  \frametitle{Using Free Bool}
+  \begin{itemize}
+  \item that was easy
+  \item what can we do with our new discovered structure
+  \item DSL: boolean operators
+    \begin{itemize}
+    \item true, false
+    \item and, or
+    \item xor, implies, nand, nor, nxor
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Bool Example}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Bool Optimization}
+  \begin{itemize}
+  \item implement short circuiting (construction vs evaluation)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Partial Evaluation}
+  \begin{itemize}
+  \item what if you don't have all the information?
+  \item partially evaluate predicates
+  \item if evaluates successfully, done
+  \item else, send it on
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{And What Now?}
 \end{frame}
 
