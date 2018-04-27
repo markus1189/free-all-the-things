@@ -67,6 +67,7 @@ addOracles = do
                                                ,"-deprecation"
                                                ,"-language:higherKinds"
                                                ,"-Xlint"
+                                               ,"-nocompdaemon"
                                                ]
   _ <- addOracle $ \(ScalafmtOptions _) -> return ["--non-interactive"
                                                   ,"--quiet"
