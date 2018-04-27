@@ -78,11 +78,11 @@ object FreeBoolDsl {
 
   //snippet:predicate
   sealed trait Predicate
-  case class Greater(value: Int) extends Predicate
+  case class GreaterThan(value: Int) extends Predicate
   case class LessThan(value: Int) extends Predicate
   case class Equals(value: Int) extends Predicate
 
-  def greaterThan(i: Int): FreeBool[Predicate] = Inject(Greater(i))
+  def greaterThan(i: Int): FreeBool[Predicate] = Inject(GreaterThan(i))
   def lessThan(i: Int): FreeBool[Predicate] = Inject(LessThan(i))
   def equals(i: Int): FreeBool[Predicate] = Inject(Equals(i))
 
@@ -97,7 +97,7 @@ object FreeBoolDsl {
 
   def evalInt(pred: FreeBool[Predicate])(input: Int): Boolean = {
     def f(p: Predicate): Boolean = p match {
-      case Greater(lowerBound) => input > lowerBound
+      case GreaterThan(lowerBound) => input > lowerBound
       case LessThan(upperBound) => input < upperBound
       case Equals(expected) => input == expected
     }
