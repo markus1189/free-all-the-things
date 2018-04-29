@@ -50,9 +50,9 @@ object FreeInstanceOpt {
 
       //snippet:opt free instance
       def flatMap[A, B](fa: Free[F, A])(f: A => Free[F, B]): Free[F, B] = fa match {
-        case Pure(x) => f(x)
+        case Pure(x) => f(x) // Left identity
         case Inject(fa) => FlatMap(Inject(fa), f)
-        case FlatMap(ga, g) =>
+        case FlatMap(ga, g) => // Associativity
           FlatMap(ga, (a: Any) => FlatMap(g(a), f))
       }
       //end

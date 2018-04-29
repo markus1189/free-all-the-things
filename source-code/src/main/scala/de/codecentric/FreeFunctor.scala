@@ -60,4 +60,19 @@ object FreeFunctor4 {
     def f = identity
   }
   //end
+
+  //snippet:functor coyoneda
+  implicit def coyoFun[F[_]]: Functor[Coyoneda[F, ?]] = new Functor[Coyoneda[F, ?]] {
+    def map[A, B](coyo: Coyoneda[F, A])(g: A => B): Coyoneda[F, B] = new Coyoneda[F, B] {
+      type X = coyo.X
+      def fa = coyo.fa
+      def f = g.compose(coyo.f)
+    }
+  }
+  //end
+
+  //snippet:coyoneda interp
+  def runCoyo[F[_]:Functor, A](coyo: Coyoneda[F, A]): F[A] = Functor[F].map(coyo.fa)(coyo.f)
+  //end
+
 }

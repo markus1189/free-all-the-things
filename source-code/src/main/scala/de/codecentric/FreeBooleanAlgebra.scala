@@ -40,14 +40,14 @@ object FreeBool {
   //end
 
   //snippet:free bool interp
-  def runFreeBool[A,B](f: A => B, fb: FreeBool[A])(implicit B: BoolAlgebra[B]): B = {
+  def runFreeBool[A,B](fb: FreeBool[A])(f: A => B)(implicit B: BoolAlgebra[B]): B = {
     fb match {
       case Tru => B.tru
       case Fls => B.fls
       case Inject(v) => f(v)
-      case Not(v) => B.not(runFreeBool(f, v))
-      case Or(lhs, rhs) => B.or(runFreeBool(f, lhs), runFreeBool(f, rhs))
-      case And(lhs, rhs) => B.and(runFreeBool(f, lhs), runFreeBool(f, rhs))
+      case Not(v) => B.not(runFreeBool(v)(f))
+      case Or(lhs, rhs) => B.or(runFreeBool(lhs)(f), runFreeBool(rhs)(f))
+      case And(lhs, rhs) => B.and(runFreeBool(lhs)(f), runFreeBool(rhs)(f))
     }
   }
   //end
@@ -76,36 +76,48 @@ object FreeBoolDsl {
   import FreeBool._
   import FreeBoolSugar._
 
-  //snippet:predicate
-  sealed trait Predicate
-  case class GreaterThan(value: Int) extends Predicate
-  case class LessThan(value: Int) extends Predicate
-  case class Equals(value: Int) extends Predicate
+  type Date = String
 
-  def greaterThan(i: Int): FreeBool[Predicate] = Inject(GreaterThan(i))
-  def lessThan(i: Int): FreeBool[Predicate] = Inject(LessThan(i))
-  def equals(i: Int): FreeBool[Predicate] = Inject(Equals(i))
+  case class Site(terms: List[String], url: String, indexedAt: Date, text: String)
 
-  def oneOf(is: List[Int]) = is.foldLeft(Fls: FreeBool[Predicate])((acc,i) => acc | equals(i))
-  //end
+  object Sites {
+    val flatMap = Site(List("Scala", "conference", "Oslo", "flatMap"), "2018.flatMap.no", "20180502", "...")
+    val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180502", "spring")
 
-  def positive = greaterThan(0)
-
-  //snippet:example predicate
-  val predicate: FreeBool[Predicate] = !(greaterThan(5) & lessThan(10)) & !(oneOf(List(42, 1337, 0)))
-  //end
-
-  def evalInt(pred: FreeBool[Predicate])(input: Int): Boolean = {
-    def f(p: Predicate): Boolean = p match {
-      case GreaterThan(lowerBound) => input > lowerBound
-      case LessThan(upperBound) => input < upperBound
-      case Equals(expected) => input == expected
-    }
-
-    runFreeBool(f, pred)
+    def all() = List(flatMap, spring)
   }
 
-  val result = evalInt(predicate)(7)
+  //snippet:predicate
+  sealed trait Search
+  case class Term(t: String) extends Search
+  case class After(date: Date) extends Search
+  case class InText(t: String) extends Search
+  case class InUrl(url: String) extends Search
+
+  def term(t: String): FreeBool[Search] = Inject(Term(t))
+  def after(date: Date): FreeBool[Search] = Inject(After(date))
+  def inText(t: String): FreeBool[Search] = Inject(InText(t))
+  def inUrl(url: String): FreeBool[Search] = Inject(InUrl(url))
+  //end
+
+  //snippet:example predicate
+  val search = term("Scala") &
+               after("20180101") &
+               !(term("Java") | inText("spring")) &
+               inUrl("flatmap")
+
+  def evalSearch(pred: FreeBool[Search])(site: Site): Boolean = {
+    def nat(s: Search): Boolean = s match {
+      case Term(t) => site.terms.contains(t)
+      case After(d) => site.indexedAt > d
+      case InText(t: String) => site.text.contains(t)
+      case InUrl(w) => site.url.contains(w)
+    }
+
+    runFreeBool(pred)(nat)
+  }
+
+  val result = Sites.all().filter(evalSearch(search))
 }
 
 object FreeBoolPartial extends App {
