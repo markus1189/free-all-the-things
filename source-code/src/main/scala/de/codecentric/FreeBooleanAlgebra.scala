@@ -87,25 +87,29 @@ object FreeBoolDsl {
     def all() = List(flatMap, spring)
   }
 
-  //snippet:predicate
+  //snippet:search predicate
   sealed trait Search
   case class Term(t: String) extends Search
   case class After(date: Date) extends Search
   case class InText(t: String) extends Search
   case class InUrl(url: String) extends Search
 
+  // and the usual smart ctors
+  //end
+
   def term(t: String): FreeBool[Search] = Inject(Term(t))
   def after(date: Date): FreeBool[Search] = Inject(After(date))
   def inText(t: String): FreeBool[Search] = Inject(InText(t))
   def inUrl(url: String): FreeBool[Search] = Inject(InUrl(url))
-  //end
 
-  //snippet:example predicate
+  //snippet:example search predicate
   val search = term("Scala") &
                after("20180101") &
                !(term("Java") | inText("spring")) &
                inUrl("flatmap")
+  //end
 
+  //snippet:eval search predicate
   def evalSearch(pred: FreeBool[Search])(site: Site): Boolean = {
     def nat(s: Search): Boolean = s match {
       case Term(t) => site.terms.contains(t)
@@ -118,6 +122,7 @@ object FreeBoolDsl {
   }
 
   val result = Sites.all().filter(evalSearch(search))
+  //end
 }
 
 object FreeBoolPartial extends App {

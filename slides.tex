@@ -475,16 +475,41 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
 
 \begin{frame}
   \frametitle{Free Bool Example: Search}
+  \inputminted{scala}{snippets/search-predicate.scala}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Partial Evaluation}
+  \frametitle{Free Bool Example: Search}
   \begin{itemize}
-  \item assume: implemented short circuiting
+  \item assuming some implicits we can write:
+  \end{itemize}
+  \inputminted{scala}{snippets/example-search-predicate.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Free Bool Example: Search}
+  \only<1>{\inputminted{scala}{snippets/eval-search-predicate.scala}}
+  \only<2>{\inputminted[highlightlines={4}, highlightcolor=yellow!60]{scala}{snippets/eval-search-predicate.scala}}
+  \only<3>{\inputminted[highlightlines={5}, highlightcolor=yellow!60]{scala}{snippets/eval-search-predicate.scala}}
+  \only<4>{\inputminted[highlightlines={6}, highlightcolor=yellow!60]{scala}{snippets/eval-search-predicate.scala}}
+  \only<5>{\inputminted[highlightlines={7}, highlightcolor=yellow!60]{scala}{snippets/eval-search-predicate.scala}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{But Wait There's More}
+  \begin{itemize}
   \item what if you don't have all the information?
-  \item partially evaluate predicates
-  \item if evaluates successfully, done
-  \item else, send it on
+    \begin{itemize}
+    \item partially evaluate predicates
+    \item if evaluates successfully, done
+    \item else, send it on
+    \end{itemize}
+  \item core language vs extension
+    \begin{itemize}
+    \item Chris also demonstrates extension
+    \item translate a rich language to base instructions
+    \item with all the advantages
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
