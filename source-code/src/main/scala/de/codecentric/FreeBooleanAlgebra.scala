@@ -106,7 +106,7 @@ object FreeBoolDsl {
   val search = term("Scala") &
                after("20180101") &
                !(term("Java") | inText("spring")) &
-               inUrl("flatmap")
+               inUrl("flatMap")
   //end
 
   //snippet:eval search predicate
@@ -130,21 +130,21 @@ object FreeBoolPartial extends App {
   import FreeBool._
   import FreeBoolSugar._
 
+  type Date = String
+
+  case class SiteMetadata(terms: List[String], url: String, indexedAt: Date)
+
   sealed trait Predicate
   case class OlderThan(i: Int) extends Predicate
   case class MinSalary(i: Int) extends Predicate
   case class HasSkill(s: String) extends Predicate
-
-  def olderThan(i: Int): FreeBool[Predicate] = Inject(OlderThan(i))
-  def minSalary(i: Int): FreeBool[Predicate] = Inject(MinSalary(i))
-  def hasSkill(s: String): FreeBool[Predicate] = Inject(HasSkill(s))
 
   def runFreeBoolP[A,B](f: A => Option[B], fb: FreeBool[A])(implicit B: BoolAlgebra[B]): Either[FreeBool[A], B] = {
     fb match {
       case Tru => Right(B.tru)
       case Fls => Right(B.fls)
       case Inject(v) => f(v).toRight(fb)
-      case Not(v) => runFreeBoolP(f, v).map(B.not(_))
+      case Not(v) => runFreeBoolP(f, v).map(B.not(_)).left.map(Not(_))
       case Or(lhs, rhs) =>
         val l = runFreeBoolP(f, lhs)
         val r = runFreeBoolP(f, rhs)
@@ -172,14 +172,20 @@ object FreeBoolPartial extends App {
     }
   }
 
-  val p: FreeBool[Predicate] = !olderThan(80) & minSalary(100) & hasSkill("Scala") & hasSkill("DevOps")
-
-  def partially(age: Int, skills: List[String])(p: Predicate): Option[Boolean] = p match {
-    case OlderThan(i) => Some(age > i)
-    case HasSkill(s) => Some(skills.contains(s))
-    case _ => None
+  def partially(meta: SiteMetadata)(p: Search): Option[Boolean] = p match {
+    case Term(t) => Some(meta.terms.contains(t))
+    case After(d) => Some(meta.indexedAt > d)
+    case InUrl(w) => Some(meta.url.contains(w))
+    case InText(t: String) => None
   }
 
-  println(runFreeBoolP(partially(28, List("Scala", "Haskell", "FP")), p))
-  println(runFreeBoolP(partially(28, List("Scala", "Haskell", "DevOps")), p))
+  object SitesMeta {
+    val flatMap = SiteMetadata(List("Scala", "conference", "Oslo", "flatMap"), "2018.flatMap.no", "20180502")
+    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180502")
+
+    def all() = List(flatMap, spring)
+  }
+
+  println(runFreeBoolP(partially(SitesMeta.flatMap), search))
+  println(runFreeBoolP(partially(SitesMeta.spring), search))
 }
