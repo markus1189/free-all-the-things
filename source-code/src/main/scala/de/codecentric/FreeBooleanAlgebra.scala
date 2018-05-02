@@ -134,12 +134,15 @@ object FreeBoolPartial extends App {
 
   case class SiteMetadata(terms: List[String], url: String, indexedAt: Date)
 
-  sealed trait Predicate
-  case class OlderThan(i: Int) extends Predicate
-  case class MinSalary(i: Int) extends Predicate
-  case class HasSkill(s: String) extends Predicate
+  object SitesMeta {
+    val flatMap = SiteMetadata(List("Scala", "conference", "Oslo", "flatMap"), "2018.flatMap.no", "20180502")
+    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180502")
+
+    def all() = List(flatMap, spring)
+  }
 
   def runFreeBoolP[A,B](f: A => Option[B], fb: FreeBool[A])(implicit B: BoolAlgebra[B]): Either[FreeBool[A], B] = {
+    // optimizer and partial evaluator in one, could be separated
     fb match {
       case Tru => Right(B.tru)
       case Fls => Right(B.fls)
@@ -177,13 +180,6 @@ object FreeBoolPartial extends App {
     case After(d) => Some(meta.indexedAt > d)
     case InUrl(w) => Some(meta.url.contains(w))
     case InText(t: String) => None
-  }
-
-  object SitesMeta {
-    val flatMap = SiteMetadata(List("Scala", "conference", "Oslo", "flatMap"), "2018.flatMap.no", "20180502")
-    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180502")
-
-    def all() = List(flatMap, spring)
   }
 
   println(runFreeBoolP(partially(SitesMeta.flatMap), search))
