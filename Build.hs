@@ -126,6 +126,10 @@ rules projectCompiler = do
     let inp = dropDirectory1 out
     copyFileChanged inp out
 
+  buildDir </> "static-sources/*" %> \out -> do
+    let inp = dropDirectory1 out
+    copyFileChanged inp out
+
 ditaa :: FilePath -> FilePath -> Action ()
 ditaa inp outp = do
   opts <- askOracle (DitaaOptions ())
@@ -192,7 +196,7 @@ graphicDeps file = map (buildDir </>) <$> commandDeps ["includegraphics"] file
 
 codeDeps :: FilePath -> Action [FilePath]
 codeDeps file = do
-  deps <- map (buildDir </>) . filter (/= "scala") <$> commandDeps ["inputminted"] file
+  deps <- map (buildDir </>) . filter (not . (`elem` ["scala", "yaml"])) <$> commandDeps ["inputminted"] file
   putQuiet ("Discovered dependencies for '" <> file <> "': " <> show deps)
   return deps
 
