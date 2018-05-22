@@ -332,66 +332,6 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
   \end{itemize}
 \end{frame}
 
-\section{Free Monoid}
-\label{sec:free-monoid}
-
-\begin{frame}
-  \begin{center}
-    \Huge
-    Freeing The Monoid
-  \end{center}
-\end{frame}
-
-\begin{frame}
-  \frametitle{The Monoid Typeclass}
-  \inputminted{scala}{snippets/monoid-typeclass.scala}
-\end{frame}
-
-\begin{frame}
-  \frametitle{The Free Monoid \textemdash{} First Try}
-  \inputminted{scala}{snippets/free-monoid-1.scala}
-\end{frame}
-
-\begin{frame}
-  \frametitle{The Laws}
-  \begin{minted}{scala}
-// left identity
-empty |+| 1 === 1
-
-// right identity
-1 |+| empty === 1
-
-// associativity
-1 |+| (2 |+| 3) === (1 |+| 2) |+| 3
-  \end{minted}
-\end{frame}
-
-\begin{frame}
-  \frametitle{The Laws and Free Monoid}
-  \begin{itemize}
-  \item let's try to enforce those laws in our structure
-  \item goal: correct by construction
-  \item arbitrary decision: associate left vs \textbf{right}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Fixing Associativity}
-\end{frame}
-
-\begin{frame}
-  \frametitle{The Problem With Neutral Elements}
-  \begin{itemize}
-  \item get rid completely? not possible
-  \item limit ourselves to a single element
-  \item restrict \texttt{Combine} to have only real values on the left side
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Our Free Monoid}
-\end{frame}
-
 \section{Free Functor}\label{sec:free-functor}
 \begin{frame}
   \begin{center}
@@ -460,6 +400,79 @@ empty |+| 1 === 1
   \item<1-> boring interpreter, though
   \item<2-> still fun!
   \end{itemize}
+\end{frame}
+
+\section{Free Monoid}
+\label{sec:free-monoid}
+
+\begin{frame}
+  \begin{center}
+    \Huge
+    Freeing The Monoid
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Monoid Typeclass}
+  \inputminted{scala}{snippets/monoid-typeclass.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Free Monoid \textemdash{} First Try}
+  \inputminted{scala}{snippets/free-monoid-1.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Laws}
+  \begin{minted}{scala}
+// left identity
+empty |+| 1 === 1
+
+// right identity
+1 |+| empty === 1
+
+// associativity
+1 |+| (2 |+| 3) === (1 |+| 2) |+| 3
+  \end{minted}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Laws and Free Monoid}
+  \begin{itemize}
+  \item let's try to enforce those laws in our structure
+  \item goal: correct by construction
+  \item arbitrary decision: associate left vs \textbf{right}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Fixing Associativity}
+  \inputminted{scala}{snippets/free-monoid-2.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The Problem With Neutral Elements}
+  \begin{itemize}
+  \item get rid completely? not possible
+  \item limit ourselves to a single element
+  \item restrict \texttt{Combine} to have only real values on the left side
+  \item goal: minimal canonical structure
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Minimizing Structure \textemdash{} Extract Inject}
+  \inputminted{scala}{snippets/free-monoid-3.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Minimizing Structure \textemdash{} Remove Inject}
+  \inputminted{scala}{snippets/free-monoid-4.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Minimizing Structure \textemdash{} List}
+  \inputminted{scala}{snippets/free-monoid-5.scala}
 \end{frame}
 
 \section{Free Boolean Algebra}\label{sec:free-boolean-algebra}
