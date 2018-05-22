@@ -81,10 +81,10 @@ object FreeBoolDsl {
   case class Site(terms: List[String], url: String, indexedAt: Date, text: String)
 
   object Sites {
-    val flatMap = Site(List("Scala", "conference", "Oslo", "flatMap"), "2018.flatMap.no", "20180502", "...")
-    val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180502", "spring")
+    val lambdaconf = Site(List("FP", "conference", "Boulder", "lambdaconf"), "lambdaconf2018.dryfta.com", "20180603", "...")
+    val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180603", "spring")
 
-    def all() = List(flatMap, spring)
+    def all() = List(lambdaconf, spring)
   }
 
   //snippet:search predicate
@@ -103,10 +103,10 @@ object FreeBoolDsl {
   def inUrl(url: String): FreeBool[Search] = Inject(InUrl(url))
 
   //snippet:example search predicate
-  val search = term("Scala") &
+  val search = term("FP") &
                after("20180101") &
                !(term("Java") | inText("spring")) &
-               inUrl("flatMap")
+               inUrl("lambdaconf")
   //end
 
   //snippet:eval search predicate
@@ -135,10 +135,10 @@ object FreeBoolPartial extends App {
   case class SiteMetadata(terms: List[String], url: String, indexedAt: Date)
 
   object SitesMeta {
-    val flatMap = SiteMetadata(List("Scala", "conference", "Oslo", "flatMap"), "2018.flatMap.no", "20180502")
-    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180502")
+    val lambdaconf = SiteMetadata(List("FP", "conference", "Boulder", "lambdaconf"), "lambdaconf2018.dryfta.com", "20180603")
+    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180603")
 
-    def all() = List(flatMap, spring)
+    def all() = List(lambdaconf, spring)
   }
 
   def runFreeBoolP[A,B](f: A => Option[B], fb: FreeBool[A])(implicit B: BoolAlgebra[B]): Either[FreeBool[A], B] = {
@@ -182,6 +182,6 @@ object FreeBoolPartial extends App {
     case InText(t: String) => None
   }
 
-  println(runFreeBoolP(partially(SitesMeta.flatMap), search))
+  println(runFreeBoolP(partially(SitesMeta.lambdaconf), search))
   println(runFreeBoolP(partially(SitesMeta.spring), search))
 }
