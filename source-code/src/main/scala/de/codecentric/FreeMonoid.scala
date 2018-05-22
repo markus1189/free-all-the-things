@@ -68,6 +68,16 @@ object FreeMonoid4 {
 
   case class Combine[A](x: A, y: FreeMonoid[A]) extends FreeMonoid[A]
   //end
+
+  //snippet:free monoid instance
+  implicit def monoid[A]: Monoid[FreeMonoid[A]] = new Monoid[FreeMonoid[A]]{
+    override def empty = Empty
+    override def combine(x: FreeMonoid[A], y: FreeMonoid[A]): FreeMonoid[A] = x match {
+      case Empty => y
+      case Combine(h, t) => Combine(h, combine(t, y))
+    }
+  }
+  //end
 }
 
 object FreeMonoid5 {
