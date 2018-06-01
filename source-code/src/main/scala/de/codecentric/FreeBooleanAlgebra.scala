@@ -132,8 +132,6 @@ object FreeBoolPartial extends App {
 
   type Date = String
 
-  case class SiteMetadata(terms: List[String], url: String, indexedAt: Date)
-
   object SitesMeta {
     val lambdaconf = SiteMetadata(List("FP", "conference", "Boulder", "lambdaconf"), "lambdaconf2018.dryfta.com", "20180603")
     val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180603")
@@ -141,8 +139,35 @@ object FreeBoolPartial extends App {
     def all() = List(lambdaconf, spring)
   }
 
+  //snippet:optimizing boolean algebras
+  def optimize[A](fa: FreeBool[A]): FreeBool[A] = fa match {
+    case Tru => Tru
+    case Fls => Fls
+    case Inject(v) => Inject(v)
+    case Not(Not(v)) => v
+    case Not(v) => Not(v)
+    case Or(Tru,_) => Tru
+    case Or(_,Tru) => Tru
+    case Or(x,y) => Or(x,y)
+    case And(Fls, _) => Fls
+    case And(_, Fls) => Fls
+    case And(x,y) => And(x,y)
+  }
+  //end
+
+  //snippet:partial evaluator
+  def partialEvaluator[A,B](p: FreeBool[A])(f: A => Option[B])(implicit B: BoolAlgebra[B]): Either[FreeBool[A], B] = p match {
+    case Tru => Right(B.tru)
+    case Inject(v) => f(v).toRight(p)
+    case Or(lhs, rhs) =>
+      val (l,r) = (partialEvaluator(lhs)(f), partialEvaluator(rhs)(f))
+      // perform short circuiting
+      ???
+    case _ => ???
+  }
+  //end
+
   def runFreeBoolP[A,B](f: A => Option[B], fb: FreeBool[A])(implicit B: BoolAlgebra[B]): Either[FreeBool[A], B] = {
-    // optimizer and partial evaluator in one, could be separated
     fb match {
       case Tru => Right(B.tru)
       case Fls => Right(B.fls)
@@ -175,12 +200,16 @@ object FreeBoolPartial extends App {
     }
   }
 
+  //snippet:partially
+  // fulltext not available
+  case class SiteMetadata(terms: List[String], url: String, indexedAt: Date)
   def partially(meta: SiteMetadata)(p: Search): Option[Boolean] = p match {
     case Term(t) => Some(meta.terms.contains(t))
     case After(d) => Some(meta.indexedAt > d)
     case InUrl(w) => Some(meta.url.contains(w))
     case InText(t: String) => None
   }
+  //end
 
   println(runFreeBoolP(partially(SitesMeta.lambdaconf), search))
   println(runFreeBoolP(partially(SitesMeta.spring), search))

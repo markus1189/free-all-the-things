@@ -516,6 +516,31 @@ x |+| empty === x
 \end{frame}
 
 \begin{frame}
+  \frametitle{Optimizing Boolean Algebras}
+  \inputminted{scala}{snippets/optimizing-boolean-algebras.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Partial Evaluation}
+  \begin{itemize}
+  \item idea: you might have only partial information
+  \item evaluate as much as possible
+  \item optimal: we can already reduce without needing more information
+  \item otherwise: send it on (JSON, Protobuf, \ldots{})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Partial Evaluation}
+  \inputminted{scala}{snippets/partial-evaluator.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Partial Evaluation}
+  \inputminted{scala}{snippets/partially.scala}
+\end{frame}
+
+\begin{frame}
   \frametitle{We Freed Boolean Algebras}
   \begin{itemize}
   \item good example of underused free structure
