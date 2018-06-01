@@ -29,7 +29,7 @@
 
 % Metadata
 \title{Free All The Things}
-\author{Markus Hauck}
+\author{Markus Hauck @markus1189}
 
 \newcommand{\recipe}{%
   \begin{itemize}
@@ -254,82 +254,6 @@ fa.flatMap(f).flatMap(g) ===
   \item context sensitive, branching, loops, fancy control flow
   \item familiarity with monadic style for DSL
   \item big drawback: interpreter has limited possibilities
-  \end{itemize}
-\end{frame}
-
-\section{Free Applicative}\label{sec:free-applicative}
-\begin{frame}
-  \begin{center}
-    \Huge
-    Freeing The Applicative
-  \end{center}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Freeing The Applicative}
-  \begin{itemize}
-  \item free monads are great, but also limited
-  \item we can't analyze the programs
-  \item how about a smaller abstraction?
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Recall}
-  \begin{itemize}
-  \item we follow the same pattern
-  \end{itemize}
-  \recipe{}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{The Applicative Typeclass}
-  \inputminted{scala}{snippets/applicative-typeclass.scala}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{AST for FreeApplicative}
-    \inputminted{scala}{snippets/free-applicative.scala}
-  \begin{minted}[autogobble]{scala}
-\end{minted}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Laws}
-\begin{minted}[autogobble]{scala}
-// identity
-Ap(Pure(identity), v) === v
-
-// composition
-Ap(Ap(Ap(Pure(_.compose), u), v), w) ===
-  Ap(u, Ap(v, w))
-
-// homomorphism
-Ap(Pure(f), Pure(x)) === Pure(f(x))
-
-// interchange
-Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
-\end{minted}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Don't Forget The Laws}
-  \only<1>{\inputminted{scala}{snippets/opt-free-ap-instance.scala}}
-  \only<2>{\inputminted[highlightlines={5, 7}, highlightcolor=yellow!40]{scala}{snippets/opt-free-ap-instance.scala}}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Running FreeApplicatives}
-  \inputminted{scala}{snippets/freeap-interp.scala}
-\end{frame}
-
-\begin{frame}
-  \frametitle{We Freed Applicatives}
-  \begin{itemize}
-  \item DSL with applicative expressiveness
-  \item context insensitive
-  \item pure computation over effectful arguments
-  \item more freedom during interpretation
   \end{itemize}
 \end{frame}
 
@@ -629,11 +553,87 @@ x |+| empty === x
 
 \section*{Bonus}\label{sec:bonus}
 
+\section{Free Applicative}\label{sec:free-applicative}
 \begin{frame}
-  \frametitle{Bonus}
+  \begin{center}
+    \Huge
+    Freeing The Applicative
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Freeing The Applicative}
   \begin{itemize}
-  \item try to encode normal form for boolean algebra
-  \item remove \texttt{Inject} cases from Monad and Applicative
+  \item free monads are great, but also limited
+  \item we can't analyze the programs
+  \item how about a smaller abstraction?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Recall}
+  \begin{itemize}
+  \item we follow the same pattern
+  \end{itemize}
+  \recipe{}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Applicative Typeclass}
+  \inputminted{scala}{snippets/applicative-typeclass.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{AST for FreeApplicative}
+    \inputminted{scala}{snippets/free-applicative.scala}
+  \begin{minted}[autogobble]{scala}
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Laws}
+\begin{minted}[autogobble]{scala}
+// identity
+Ap(Pure(identity), v) === v
+
+// composition
+Ap(Ap(Ap(Pure(_.compose), u), v), w) ===
+  Ap(u, Ap(v, w))
+
+// homomorphism
+Ap(Pure(f), Pure(x)) === Pure(f(x))
+
+// interchange
+Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
+\end{minted}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Don't Forget The Laws}
+  \only<1>{\inputminted{scala}{snippets/opt-free-ap-instance.scala}}
+  \only<2>{\inputminted[highlightlines={5, 7}, highlightcolor=yellow!40]{scala}{snippets/opt-free-ap-instance.scala}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Running FreeApplicatives}
+  \inputminted{scala}{snippets/freeap-interp.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{We Freed Applicatives}
+  \begin{itemize}
+  \item DSL with applicative expressiveness
+  \item context insensitive
+  \item pure computation over effectful arguments
+  \item more freedom during interpretation
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Going Deeper}
+  \begin{itemize}
+  \item try to encode one of the normal forms for boolean algebras
+  \item try to remove \texttt{Inject} cases from Monad and Applicative
   \item free Magmas
   \item define free X using alternative minimal set of ops of the typeclass
   \end{itemize}
