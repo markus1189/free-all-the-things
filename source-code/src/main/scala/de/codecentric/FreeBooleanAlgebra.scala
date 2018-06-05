@@ -78,7 +78,9 @@ object FreeBoolDsl {
 
   type Date = String
 
+  //snippet:site type
   case class Site(terms: List[String], url: String, indexedAt: Date, text: String)
+  //end
 
   object Sites {
     val lambdaconf = Site(List("FP", "conference", "Boulder", "lambdaconf"), "lambdaconf2018.dryfta.com", "20180603", "...")
@@ -161,7 +163,7 @@ object FreeBoolPartial extends App {
     case Inject(v) => f(v).toRight(p)
     case Or(lhs, rhs) =>
       val (l,r) = (partialEvaluator(lhs)(f), partialEvaluator(rhs)(f))
-      // perform short circuiting
+      // check if fully evaluated
       ???
     case _ => ???
   }

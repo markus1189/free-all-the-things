@@ -197,7 +197,6 @@ graphicDeps file = map (buildDir </>) <$> commandDeps ["includegraphics"] file
 codeDeps :: FilePath -> Action [FilePath]
 codeDeps file = do
   deps <- map (buildDir </>) . filter (not . (`elem` ["scala", "yaml"])) <$> commandDeps ["inputminted"] file
-  putQuiet ("Discovered dependencies for '" <> file <> "': " <> show deps)
   return deps
 
 extractSnippet :: FilePath -> Action String
