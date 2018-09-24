@@ -65,7 +65,7 @@
   \item explain the technique behind ``Free X''
   \item apply the technique to different examples
   \item takeaway: it's easier than you thought
-  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/lambdaconf}
+  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/upnorth}
   \end{itemize}
 \end{frame}
 
@@ -352,12 +352,21 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
 
 \begin{frame}[fragile]
   \frametitle{Clean Code Police}
+  \only<1->{%
   \begin{center}
     \includegraphics[width=0.3\textwidth]{static-images/police.png}
   \end{center}
+}
+\only<2->{%
   \begin{itemize}
   \item only one subclass?
   \end{itemize}
+}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \inputminted[highlightlines={3-4}, highlightcolor=yellow!40]{scala}{snippets/free-functor2.scala}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -626,7 +635,7 @@ x |+| empty === x
   \frametitle{Resources}
   \begin{itemize}
   \item Free Boolean Algebra by Chris Stucchio \url{https://engineering.wingify.com/posts/Free-objects/}
-  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/lambdaconf}
+  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/upnorth}
   \end{itemize}
 \end{frame}
 
