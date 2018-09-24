@@ -83,10 +83,10 @@ object FreeBoolDsl {
   //end
 
   object Sites {
-    val lambdaconf = Site(List("FP", "conference", "Boulder", "lambdaconf"), "lambdaconf2018.dryfta.com", "20180603", "...")
-    val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180603", "spring")
+    val upnorth = Site(List("FP", "conference", "toronto", "upnorth"), "scalaupnorth.com", "20180929", "...")
+    val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180929", "spring")
 
-    def all() = List(lambdaconf, spring)
+    def all() = List(upnorth, spring)
   }
 
   //snippet:search predicate
@@ -108,7 +108,7 @@ object FreeBoolDsl {
   val search = term("FP") &
                after("20180101") &
                !(term("Java") | inText("spring")) &
-               inUrl("lambdaconf")
+               inUrl("upnorth")
   //end
 
   //snippet:eval search predicate
@@ -135,10 +135,10 @@ object FreeBoolPartial extends App {
   type Date = String
 
   object SitesMeta {
-    val lambdaconf = SiteMetadata(List("FP", "conference", "Boulder", "lambdaconf"), "lambdaconf2018.dryfta.com", "20180603")
-    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180603")
+    val upnorth = SiteMetadata(List("FP", "conference", "toronto", "upnorth"), "scalaupnorth.com", "20180929")
+    val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180929")
 
-    def all() = List(lambdaconf, spring)
+    def all() = List(upnorth, spring)
   }
 
   //snippet:optimizing boolean algebras
@@ -213,6 +213,6 @@ object FreeBoolPartial extends App {
   }
   //end
 
-  println(runFreeBoolP(partially(SitesMeta.lambdaconf), search))
+  println(runFreeBoolP(partially(SitesMeta.upnorth), search))
   println(runFreeBoolP(partially(SitesMeta.spring), search))
 }
