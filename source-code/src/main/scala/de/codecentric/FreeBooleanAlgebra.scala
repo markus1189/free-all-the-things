@@ -83,7 +83,7 @@ object FreeBoolDsl {
   //end
 
   object Sites {
-    val upnorth = Site(List("FP", "conference", "toronto", "upnorth"), "scalaupnorth.com", "20180929", "...")
+    val upnorth = Site(List("FP", "conference", "toronto", "upnorth"), "scalaupnorth.com", "20180929", "body")
     val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180929", "spring")
 
     def all() = List(upnorth, spring)
