@@ -110,7 +110,9 @@
 \begin{frame}[fragile]
   \frametitle{What Is Free}
   \begin{itemize}
-  \item still complicated!
+  \item still complicated!!!11
+  \item a Free X is the \textbf{minimal} structure that
+    \textbf{satisfies the laws} of the typeclass X (mine)
   \item rejoice: there is a pretty mechanical recipe
     \recipe{}
   \end{itemize}
@@ -121,6 +123,7 @@
   \begin{itemize}
   \item nice API using typeclass
   \item use Free X as if it was X
+  \item lift your DSL ops using \texttt{inject} (or \texttt{lift})
   \item program reified into datastructure
   \item structure can be analyzed/optimized
   \item one program \textemdash{} many interpretations
@@ -131,7 +134,9 @@
   \frametitle{Disclaimer Before We Start}
   \begin{itemize}
   \item deep embeddings / initial encoding / data structure representation
-  \item not: finally tagless, optimization
+  \item not: finally tagless, optimization, using Free Monads
+  \item for some typeclasses, there are different sets of minimal operations (Monad: three!)
+  \item fun thing: technique works for every one of them, homework
   \end{itemize}
 \end{frame}
 
@@ -145,6 +150,9 @@
 
 \begin{frame}[fragile]
   \frametitle{The Monad Typeclass}
+  \begin{itemize}
+  \item we use the \texttt{pure} and \texttt{flatMap} version
+  \end{itemize}
   \begin{center}
     \inputminted{scala}{snippets/monad-typeclass.scala}
   \end{center}
@@ -226,18 +234,29 @@ fa.flatMap(f).flatMap(g) ===
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{The Right Free Monad}
-  \begin{itemize}
-  \item common transformation: associate \texttt{flatMap}'s to the right
-  \item avoids having to rebuild the tree repeatedly during construction
-  \item how: during construction time
-  \end{itemize}
+  \frametitle{Transforming Free Monads: Old Instance}
+  \begin{center}
+    \inputminted[highlightlines={5-7}, highlightcolor=yellow!40]{scala}{snippets/free-instance.scala}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Transforming Free Monads}
+  \frametitle{Transforming Free Monads: Optimized flatMap}
   \only<1>{\inputminted[highlightlines={3}, highlightcolor=yellow!40]{scala}{snippets/opt-free-instance.scala}}
   \only<2>{\inputminted[highlightlines={3, 6}, highlightcolor=yellow!40]{scala}{snippets/opt-free-instance.scala}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Transforming Free Monads: Done}
+  \begin{itemize}
+  \item what do we learn?
+  \item laws are not boring, they allow refactorings and optimization
+  \item just by adhering to the law, we made our Free Monad more stack safe
+  \end{itemize}
+  \begin{minted}{scala}
+FlatMap(FlatMap(FlatMap(fa, f), g), ...)
+FlatMap(fa, x => FlatMap(f(x), y => FlatMap(g(y), z => ...)))
+  \end{minted}
 \end{frame}
 
 \begin{frame}
@@ -246,79 +265,6 @@ fa.flatMap(f).flatMap(g) ===
   \item DSL with monadic expressiveness
   \item context sensitive, branching, loops, fancy control flow
   \item familiarity with monadic style for DSL
-  \item big drawback: interpreter has limited possibilities
-  \end{itemize}
-\end{frame}
-
-\section{Free Applicative}\label{sec:free-applicative}
-\begin{frame}
-  \begin{center}
-    \Huge
-    Freeing The Applicative
-  \end{center}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Freeing The Applicative}
-  \begin{itemize}
-  \item free monads are great, but also limited
-  \item we can't analyze the programs
-  \item how about a smaller abstraction?
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Recall}
-  \recipe{}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{The Applicative Typeclass}
-  \inputminted{scala}{snippets/applicative-typeclass.scala}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{AST for FreeApplicative}
-    \inputminted{scala}{snippets/free-applicative.scala}
-  \begin{minted}[autogobble]{scala}
-\end{minted}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Laws}
-\begin{minted}[autogobble]{scala}
-// identity
-Ap(Pure(identity), v) === v
-
-// composition
-Ap(Ap(Ap(Pure(_.compose), u), v), w) ===
-  Ap(u, Ap(v, w))
-
-// homomorphism
-Ap(Pure(f), Pure(x)) === Pure(f(x))
-
-// interchange
-Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
-\end{minted}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Don't Forget The Laws}
-  \only<1>{\inputminted[highlightlines={5, 7}, highlightcolor=yellow!40]{scala}{snippets/opt-free-ap-instance.scala}}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Running FreeApplicatives}
-  \inputminted{scala}{snippets/freeap-interp.scala}
-\end{frame}
-
-\begin{frame}
-  \frametitle{We Freed Applicatives}
-  \begin{itemize}
-  \item DSL with applicative expressiveness
-  \item context insensitive
-  \item pure computation over effectful arguments
-  \item more freedom during interpretation
   \end{itemize}
 \end{frame}
 
@@ -338,6 +284,30 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
 \begin{frame}[fragile]
   \frametitle{The Functor Typeclass}
   \inputminted{scala}{snippets/functor-typeclass.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Functor Laws}
+  \begin{minted}{scala}
+// identity law
+fa.map(identity) === fa
+
+// composition
+fa.map(f).map(g) === fa.map(f.compose(g))
+  \end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \only<1>{\inputminted{scala}{snippets/free-functor1.scala}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Freeing The Functor}
+  \begin{itemize}
+  \item cool! that was easy
+  \item can we get rid of something?
+  \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -394,6 +364,7 @@ Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
   \begin{itemize}
   \item DSL with hmm functorial expressiveness?
   \item map fusion! (functor law)
+  \item interesting: combine with other structures
   \item boring interpreter, though
   \item still fun!
   \end{itemize}
@@ -470,6 +441,11 @@ x |+| empty === x
 \begin{frame}
   \frametitle{The Monoid Instance}
   \inputminted{scala}{snippets/free-monoid-instance.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Minimizing Structure \textemdash{} Looks Familiar?}
+  \inputminted{scala}{snippets/free-monoid-4.scala}
 \end{frame}
 
 \begin{frame}
@@ -575,6 +551,13 @@ x |+| empty === x
   \only<4>{\inputminted[highlightlines={7}, highlightcolor=yellow!40]{scala}{snippets/eval-search-predicate.scala}}
 \end{frame}
 
+\begin{frame}[fragile]
+  \begin{center}
+    \Huge
+    Demo Time
+  \end{center}
+\end{frame}
+
 \begin{frame}
   \frametitle{But Wait There's More}
   \begin{itemize}
@@ -619,6 +602,13 @@ x |+| empty === x
   \inputminted{scala}{snippets/partially.scala}
 \end{frame}
 
+\begin{frame}[fragile]
+  \begin{center}
+    \Huge
+    Demo Time
+  \end{center}
+\end{frame}
+
 \begin{frame}
   \frametitle{We Freed Boolean Algebras}
   \begin{itemize}
@@ -656,6 +646,78 @@ x |+| empty === x
 \appendix{}
 
 \section*{Bonus}\label{sec:bonus}
+
+\section{Free Applicative}\label{sec:free-applicative}
+\begin{frame}
+  \begin{center}
+    \Huge
+    Freeing The Applicative
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Freeing The Applicative}
+  \begin{itemize}
+  \item free monads are great, but also limited
+  \item we can't analyze the programs
+  \item how about a smaller abstraction?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Recall}
+  \recipe{}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Applicative Typeclass}
+  \inputminted{scala}{snippets/applicative-typeclass.scala}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{AST for FreeApplicative}
+    \inputminted{scala}{snippets/free-applicative.scala}
+  \begin{minted}[autogobble]{scala}
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Laws}
+\begin{minted}[autogobble]{scala}
+// identity
+Ap(Pure(identity), v) === v
+
+// composition
+Ap(Ap(Ap(Pure(_.compose), u), v), w) ===
+  Ap(u, Ap(v, w))
+
+// homomorphism
+Ap(Pure(f), Pure(x)) === Pure(f(x))
+
+// interchange
+Ap(u, Pure(y)) === Ap(Pure(_(y)), u)
+\end{minted}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Don't Forget The Laws}
+  \only<1>{\inputminted[highlightlines={5, 7}, highlightcolor=yellow!40]{scala}{snippets/opt-free-ap-instance.scala}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Running FreeApplicatives}
+  \inputminted{scala}{snippets/freeap-interp.scala}
+\end{frame}
+
+\begin{frame}
+  \frametitle{We Freed Applicatives}
+  \begin{itemize}
+  \item DSL with applicative expressiveness
+  \item context insensitive
+  \item pure computation over effectful arguments
+  \item more freedom during interpretation
+  \end{itemize}
+\end{frame}
 
 \begin{frame}
   \frametitle{Going Deeper}
