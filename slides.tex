@@ -64,8 +64,7 @@
   \begin{itemize}
   \item explain the technique behind ``Free X''
   \item apply the technique to different examples
-  \item takeaway: it's easier than you thought
-  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/upnorth}
+  \item takeaway: \textbf{you} can safely do this at home
   \end{itemize}
 \end{frame}
 
@@ -121,6 +120,7 @@
 \begin{frame}
   \frametitle{Why Free}
   \begin{itemize}
+  \item but why should I care at all?
   \item nice API using typeclass
   \item use Free X as if it was X
   \item lift your DSL ops using \texttt{inject} (or \texttt{lift})
@@ -135,7 +135,9 @@
   \begin{itemize}
   \item deep embeddings / initial encoding / data structure representation
   \item not: finally tagless, optimization, using Free Monads
+  \item finally tagless possible, but transformation/inspection of AST is more complex
   \item for some typeclasses, there are different sets of minimal operations (Monad: three!)
+  \item talk might include some hand waving, but for your own good
   \item fun thing: technique works for every one of them, homework
   \end{itemize}
 \end{frame}
@@ -195,6 +197,9 @@ fa.flatMap(f).flatMap(g) ===
 
 \begin{frame}[fragile]
   \frametitle{Freeing The Monad}
+  \begin{itemize}
+  \item the \texttt{Monad} typeclass instance just wraps things up
+  \end{itemize}
   \begin{center}
     \inputminted{scala}{snippets/free-instance.scala}
   \end{center}
@@ -202,6 +207,9 @@ fa.flatMap(f).flatMap(g) ===
 
 \begin{frame}[fragile]
   \frametitle{Interpreter}
+  \begin{itemize}
+  \item going from our \texttt{FreeMonad} back into regular Monad-Land
+  \end{itemize}
   \inputminted{scala}{snippets/free-interp.scala}
 \end{frame}
 
@@ -230,6 +238,7 @@ fa.flatMap(f).flatMap(g) ===
   \item programmer: after interpretation it's no longer visible
   \item mathematician: that's not the free monad!
   \item tradeoff: during construction vs during interpretation
+  \item let's see what we can do here
   \end{itemize}
 \end{frame}
 
@@ -249,6 +258,7 @@ fa.flatMap(f).flatMap(g) ===
 \begin{frame}[fragile]
   \frametitle{Transforming Free Monads: Done}
   \begin{itemize}
+  \item Quiz: what about \texttt{fa.flatMap(pure) === fa}
   \item what do we learn?
   \item laws are not boring, they allow refactorings and optimization
   \item just by adhering to the law, we made our Free Monad more stack safe
@@ -306,6 +316,7 @@ fa.map(f).map(g) === fa.map(f.compose(g))
   \frametitle{Freeing The Functor}
   \begin{itemize}
   \item cool! that was easy
+  \item next step is to try to minimize the structure
   \item can we get rid of something?
   \end{itemize}
 \end{frame}
@@ -330,6 +341,7 @@ fa.map(f).map(g) === fa.map(f.compose(g))
 \only<2->{%
   \begin{itemize}
   \item only one subclass?
+  \item what do we currently use the trait for?
   \end{itemize}
 }
 \end{frame}
@@ -342,6 +354,9 @@ fa.map(f).map(g) === fa.map(f.compose(g))
 \begin{frame}[fragile]
   \frametitle{Freeing The Functor}
   \inputminted{scala}{snippets/free-functor3.scala}
+  \begin{itemize}
+  \item wait a moment, does that look familiar?
+  \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -383,6 +398,9 @@ fa.map(f).map(g) === fa.map(f.compose(g))
 \begin{frame}
   \frametitle{The Monoid Typeclass}
   \inputminted{scala}{snippets/monoid-typeclass.scala}
+  \begin{itemize}
+  \item let's start blindly following our mechanical approach
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -409,8 +427,29 @@ x |+| empty === x
   \begin{itemize}
   \item let's try to enforce those laws in our structure
   \item goal: correct by construction
-  \item arbitrary decision: associate left vs \textbf{right}
+  \item (almost) arbitrary decision: associate left vs \textbf{right}
+  \item you will see why we chose to associate to the right soon!
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Fixing Associativity}
+
+  \begin{itemize}
+  \item so this is okay:
+  \end{itemize}
+
+\begin{minted}{scala}
+Combine(Inject(1), Combine(Inject(2), Inject(3)))
+\end{minted}
+
+\begin{itemize}
+\item but this should not be possible:
+\end{itemize}
+
+\begin{minted}{scala}
+Combine(Combine(Inject(1), Inject(2)), Inject(3))
+\end{minted}
 \end{frame}
 
 \begin{frame}
@@ -421,9 +460,10 @@ x |+| empty === x
 \begin{frame}
   \frametitle{The Problem With Neutral Elements}
   \begin{itemize}
+  \item still problem: \texttt{Combine(Empty, Empty)}
   \item get rid completely? not possible
   \item limit ourselves to a single element
-  \item restrict \texttt{Combine} to have only real values on the left side
+  \item restrict \texttt{Combine} to have only \texttt{Inject} values on the left side
   \item goal: minimal canonical structure
   \end{itemize}
 \end{frame}
@@ -431,6 +471,9 @@ x |+| empty === x
 \begin{frame}
   \frametitle{Minimizing Structure \textemdash{} Extract Inject}
   \inputminted[highlightlines={1, 7}, highlightcolor=yellow!40]{scala}{snippets/free-monoid-3.scala}
+  \begin{itemize}
+  \item but now Inject looks silly\ldots
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -441,6 +484,9 @@ x |+| empty === x
 \begin{frame}
   \frametitle{The Monoid Instance}
   \inputminted{scala}{snippets/free-monoid-instance.scala}
+  \begin{itemize}
+  \item note: that might start to look familiar
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -512,6 +558,8 @@ x |+| empty === x
   \frametitle{Using Free Bool}
   \begin{itemize}
   \item that was simple (though boilerplate-y)
+  \item skip trying to encode laws (because I don't know how)
+  \item but as long as target is lawful, morally okay
   \item what can we do with our new discovered structure
   \item reminder: boolean operators
     \begin{itemize}
@@ -535,11 +583,37 @@ x |+| empty === x
   \inputminted{scala}{snippets/example-search-predicate.scala}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Free Bool Example: Search}
+
+  \begin{center}
+  \resizebox{.8\linewidth}{!}{\begin{tikzpicture}[sibling distance=10em,
+  every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+  \node[color=beamer@centricgreen, rounded corners] {And}
+    child { node {Term(``FP'')} }
+    child { node[color=beamer@centricgreen, rounded corners] {And}
+      child { node {After(``20180101'')} }
+      child { node[color=beamer@centricgreen, rounded corners]{And}
+        child { node[color=beamer@centricgreen, rounded corners] {Not}
+          child { node[color=beamer@centricgreen, rounded corners] {Or}
+            child { node {Term(``java'')} }
+            child { node {InText(``spring'')} }
+          }
+        }
+        child { node{InUrl(``functionalconf'')} }
+      }
+    };
+  \end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
 \begin{frame}
   \frametitle{The Site Type}
   \inputminted{scala}{snippets/site-type.scala}
   \begin{itemize}
   \item all predicates are run against a collection of these
+  \item we know how to tear down \texttt{FreeBool}, but not yet how to interpret \texttt{Search} values
   \end{itemize}
 \end{frame}
 
@@ -552,10 +626,57 @@ x |+| empty === x
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Free Bool Example: Search}
+
   \begin{center}
-    \Huge
-    Demo Time
-  \end{center}
+  \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-site.scala}
+
+  \resizebox{7cm}{!}{\begin{tikzpicture}[sibling distance=10em,
+  every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+  \node[color=beamer@centricgreen, rounded corners] {And}
+    child { node {Term(``FP'')} }
+    child { node[color=beamer@centricgreen, rounded corners] {And}
+      child { node {After(``20180101'')} }
+      child { node[color=beamer@centricgreen, rounded corners]{And}
+        child { node[color=beamer@centricgreen, rounded corners] {Not}
+          child { node[color=beamer@centricgreen, rounded corners] {Or}
+            child { node {Term(``java'')} }
+            child { node {InText(``spring'')} }
+          }
+        }
+        child { node{InUrl(``functionalconf'')}}
+      }
+    };
+  \end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Free Bool Example: Search}
+
+  \begin{center}
+  \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-site.scala}
+
+  \resizebox{6cm}{!}{\begin{tikzpicture}[sibling distance=10em,
+  every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+  \node[color=beamer@centricgreen, rounded corners] {And}
+    child { node[color=red!90] {True} }
+    child { node[color=beamer@centricgreen, rounded corners] {And}
+      child { node[color=red!90] {True} }
+      child { node[color=beamer@centricgreen, rounded corners]{And}
+        child { node[color=beamer@centricgreen, rounded corners] {Not}
+          child { node[color=beamer@centricgreen, rounded corners] {Or}
+            child { node[color=red!90] {False} }
+            child { node[color=red!90] {False} }
+          }
+        }
+        child { node[color=red!90]{True}}
+      }
+    };
+  \end{tikzpicture}
+}
+\end{center}
 \end{frame}
 
 \begin{frame}
@@ -585,7 +706,8 @@ x |+| empty === x
 \begin{frame}
   \frametitle{Partial Evaluation}
   \begin{itemize}
-  \item idea: you might have only partial information
+  \item problem: you might have only partial information
+  \item e.g.\ full text of indexed website slow to load
   \item evaluate as much as possible
   \item optimal: we can already reduce without needing more information
   \item otherwise: send it on (JSON, Protobuf, \ldots{})
@@ -603,10 +725,138 @@ x |+| empty === x
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Partial Evaluation}
+
   \begin{center}
-    \Huge
-    Demo Time
-  \end{center}
+  \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-meta-site.scala}
+
+  \resizebox{7cm}{!}{\begin{tikzpicture}[sibling distance=10em,
+  every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+  \node[color=beamer@centricgreen, rounded corners] {And}
+    child { node {Term(``FP'')} }
+    child { node[color=beamer@centricgreen, rounded corners] {And}
+      child { node {After(``20180101'')} }
+      child { node[color=beamer@centricgreen, rounded corners]{And}
+        child { node[color=beamer@centricgreen, rounded corners] {Not}
+          child { node[color=beamer@centricgreen, rounded corners] {Or}
+            child { node {Term(``java'')} }
+            child { node {InText(``spring'')} }
+          }
+        }
+        child { node{InUrl(``functionalconf'')}}
+      }
+    };
+  \end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Partial Evaluation}
+    \begin{center}
+      \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-meta-site.scala}
+
+      \resizebox{6cm}{!}{
+        \begin{tikzpicture}[sibling distance=10em, every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+          \node[color=beamer@centricgreen, rounded corners] {And}
+          child { node[color=red!90] {True} }
+          child { node[color=beamer@centricgreen, rounded corners] {And}
+            child { node[color=red!90] {True} }
+            child { node[color=beamer@centricgreen, rounded corners]{And}
+              child { node[color=beamer@centricgreen, rounded corners] {Not}
+                child { node[color=beamer@centricgreen, rounded corners] {Or}
+                  child { node[color=red!90] {False} }
+                  child { node[dashed] {InText(``spring'')} }
+                }
+              }
+              child { node[color=red!90]{True}}
+            }
+          };
+        \end{tikzpicture}
+      }
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Partial Evaluation}
+    \begin{center}
+      \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-meta-site.scala}
+      \vspace*{1cm}
+      \resizebox{3cm}{!}{
+        \begin{tikzpicture}[sibling distance=10em, every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+          \node[color=beamer@centricgreen, rounded corners] {Not}
+          child { node[dashed] {InText(``spring'')} }
+          ;
+        \end{tikzpicture}
+      }
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Partial Evaluation}
+
+  \begin{center}
+  \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-spring-meta-site.scala}
+
+  \resizebox{7cm}{!}{\begin{tikzpicture}[sibling distance=10em,
+  every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+  \node[color=beamer@centricgreen, rounded corners] {And}
+    child { node {Term(``FP'')} }
+    child { node[color=beamer@centricgreen, rounded corners] {And}
+      child { node {After(``20180101'')} }
+      child { node[color=beamer@centricgreen, rounded corners]{And}
+        child { node[color=beamer@centricgreen, rounded corners] {Not}
+          child { node[color=beamer@centricgreen, rounded corners] {Or}
+            child { node {Term(``java'')} }
+            child { node {InText(``spring'')} }
+          }
+        }
+        child { node{InUrl(``functionalconf'')}}
+      }
+    };
+  \end{tikzpicture}
+}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Partial Evaluation}
+    \begin{center}
+      \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-spring-meta-site.scala}
+
+      \resizebox{6cm}{!}{
+        \begin{tikzpicture}[sibling distance=10em, every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+          \node[color=beamer@centricgreen, rounded corners] {And}
+          child { node[color=red!90] {False} }
+          child { node[color=beamer@centricgreen, rounded corners] {And}
+            child { node[color=red!90] {True} }
+            child { node[color=beamer@centricgreen, rounded corners]{And}
+              child { node[color=beamer@centricgreen, rounded corners] {Not}
+                child { node[color=beamer@centricgreen, rounded corners] {Or}
+                  child { node[color=red!90] {True} }
+                  child { node[dashed] {InText(``spring'')} }
+                }
+              }
+              child { node[color=red!90]{False}}
+            }
+          };
+        \end{tikzpicture}
+      }
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Partial Evaluation}
+    \begin{center}
+      \inputminted[fontsize=\footnotesize]{scala}{snippets/functionalconf-spring-meta-site.scala}
+      \vspace*{1cm}
+      \resizebox{3cm}{!}{
+        \begin{tikzpicture}[sibling distance=10em, every node/.style = {shape=rectangle, draw, align=center, color=beamer@codeblue}]]
+          \node {False}
+          ;
+        \end{tikzpicture}
+      }
+    \end{center}
 \end{frame}
 
 \begin{frame}
@@ -614,8 +864,8 @@ x |+| empty === x
   \begin{itemize}
   \item good example of underused free structure
   \item partial evaluation
-  \item serialize the AST (JSON, Protobuf, Avro, \ldots{})
-  \item exercise: minimize AST representation
+  \item whole-program optimizations
+  \item serialize the AST (JSON, Protobuf, \ldots{})
   \end{itemize}
 \end{frame}
 
@@ -625,7 +875,7 @@ x |+| empty === x
   \frametitle{Resources}
   \begin{itemize}
   \item Free Boolean Algebra by Chris Stucchio \url{https://engineering.wingify.com/posts/Free-objects/}
-  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/upnorth}
+  \item Source Code: \url{https://github.com/markus1189/free-all-the-things/tree/functionalconf}
   \end{itemize}
 \end{frame}
 

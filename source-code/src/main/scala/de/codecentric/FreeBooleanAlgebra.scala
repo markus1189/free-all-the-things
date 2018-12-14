@@ -83,6 +83,10 @@ object FreeBoolDsl {
   //end
 
   object Sites {
+    //snippet:functionalconf site
+    Site(terms = List("FP", "bangalore"), url = "functionalconf.com", indexedAt = "20181212", text = "lots of body")
+    //end
+
     val functionalconf = Site(List("FP", "conference", "bangalore", "functionalconf"), "functionalconf.com", "20181212", "body")
     val spring = Site(List("Java", "spring", "boot", "cloud"), "spring.io", "20180929", "spring")
 
@@ -135,7 +139,14 @@ object FreeBoolPartial extends App {
   type Date = String
 
   object SitesMeta {
+    //snippet:functionalconf meta site
+    SiteMetadata(terms = List("FP", "bangalore"), url = "functionalconf.com", indexedAt = "20180929")
+    //end
     val functionalconf = SiteMetadata(List("FP", "conference", "bangalore", "functionalconf"), "functionalconf.com", "20180929")
+
+    //snippet:functionalconf spring meta site
+    SiteMetadata(terms = List("Java", "spring"), url = "spring.io", indexedAt = "20180929")
+    //end
     val spring = SiteMetadata(List("Java", "spring", "boot", "cloud"), "spring.io", "20180929")
 
     def all() = List(functionalconf, spring)
@@ -146,14 +157,14 @@ object FreeBoolPartial extends App {
     case Tru => Tru
     case Fls => Fls
     case Inject(v) => Inject(v)
-    case Not(Not(v)) => v
-    case Not(v) => Not(v)
+    case Not(Not(v)) => optimize(v)
+    case Not(v) => Not(optimize(v))
     case Or(Tru,_) => Tru
     case Or(_,Tru) => Tru
-    case Or(x,y) => Or(x,y)
+    case Or(x,y) => Or(optimize(x),optimize(y))
     case And(Fls, _) => Fls
     case And(_, Fls) => Fls
-    case And(x,y) => And(x,y)
+    case And(x,y) => And(optimize(x),optimize(y))
   }
   //end
 
@@ -203,8 +214,8 @@ object FreeBoolPartial extends App {
   }
 
   //snippet:partially
-  // fulltext not available
   case class SiteMetadata(terms: List[String], url: String, indexedAt: Date)
+
   def partially(meta: SiteMetadata)(p: Search): Option[Boolean] = p match {
     case Term(t) => Some(meta.terms.contains(t))
     case After(d) => Some(meta.indexedAt > d)
